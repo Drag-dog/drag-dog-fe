@@ -18,6 +18,7 @@ type Props = { children: React.ReactNode };
 
 const Main = ({ children }: Props) => {
   const [TitleComponenets] = getChildrenByName(children, "Title");
+  const [SubTitleComponenets] = getChildrenByName(children, "SubTitle");
   const arrayBodyComponenets = getChildrenByName(children, "Body");
   const arrayAbsoluteComponenets = getChildrenByName(children, "Absolute");
   const arrayMainCtaComponenets = getChildrenByName(children, "MainCta");
@@ -34,6 +35,8 @@ const Main = ({ children }: Props) => {
       ) : (
         <Empty height="1rem" />
       )}
+      {!!SubTitleComponenets ? SubTitleComponenets : <Empty height="0.5rem" />}
+      <Empty height="2rem" />
       {isEmpty(arrayBodyComponenets) || arrayBodyComponenets}
       <Empty height="2rem" />
       {isEmpty(arrayMainCtaComponenets) || arrayMainCtaComponenets}
@@ -43,6 +46,10 @@ const Main = ({ children }: Props) => {
 
 const Title = () => {
   return <MainHeader />;
+};
+
+const SubTitle = ({ children }: Props) => {
+  return <>{children}</>;
 };
 
 const Absolute = ({ children }: Props) => {
@@ -79,4 +86,4 @@ const MainCta = ({ children }: Props) => {
   );
 };
 
-export const PageLayout = Object.assign(Main, { Title, Absolute, Body, MainCta });
+export const PageLayout = Object.assign(Main, { Title, SubTitle, Absolute, Body, MainCta });

@@ -5,8 +5,10 @@ import { MainCtaBtn } from "../../components/molecules/MainCtaBtn";
 import { Empty } from "../../components/atoms";
 import mainAsset1 from "../../assets/main-asset1.jpeg";
 import mainAsset2 from "../../assets/main-asset2.jpeg";
+import { useNavigate } from "react-router-dom";
 
 export const Main = () => {
+  const navigate = useNavigate();
   return (
     <PageLayout>
       <PageLayout.Title />
@@ -35,7 +37,7 @@ export const Main = () => {
         <Empty height="5rem" />
       </PageLayout.Body>
       <PageLayout.MainCta>
-        <MainCtaBtn>Start!</MainCtaBtn>
+        <MainCtaBtn onClick={() => navigate("/upload")}>Start!</MainCtaBtn>
       </PageLayout.MainCta>
     </PageLayout>
   );
