@@ -15,7 +15,7 @@ const originColor = {
 
 export const appColor = {
   ...originColor,
-  backGround: originColor.grey1,
+  backGround: originColor.white,
   border: originColor.grey2,
   text: originColor.grey3,
   primary: originColor.greyBlue,
