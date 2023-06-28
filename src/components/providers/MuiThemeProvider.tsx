@@ -1,10 +1,10 @@
 import React from "react";
 import { CssBaseline } from "@mui/material";
 import { ThemeProvider, createTheme, responsiveFontSizes } from "@mui/material/styles";
-import { configMuiBreakpoints } from "../../../constants/config/configMuiBreakpoints";
-import { configMuiComponents } from "../../../constants/config/configMuiComponents";
-import { configMuiPalette } from "../../../constants/config/configMuiPalette";
-import { configMuiTypography } from "../../../constants/config/configMuiTypography";
+import { configMuiBreakpoints } from "../../constants/config/configMuiBreakpoints";
+import { configMuiComponents } from "../../constants/config/configMuiComponents";
+import { configMuiPalette } from "../../constants/config/configMuiPalette";
+import { configMuiTypography } from "../../constants/config/configMuiTypography";
 
 let theme = createTheme({
   typography: { ...configMuiTypography },
