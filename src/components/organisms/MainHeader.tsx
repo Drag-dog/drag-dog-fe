@@ -36,10 +36,11 @@ export const MainHeader = ({ menu }: Props) => {
       </Stack>
 
       {isSignIn ? (
-        <Button onClick={() => navigate("/profile")}>
+        // [Todo] 로그아웃 구현 필요
+        <Button onClick={() => {}}>
           <PortraitIcon />
           &nbsp;
-          <Typography>내 정보</Typography>
+          <Typography>로그아웃</Typography>
         </Button>
       ) : (
         <Button onClick={() => navigate("/sign-in")}>

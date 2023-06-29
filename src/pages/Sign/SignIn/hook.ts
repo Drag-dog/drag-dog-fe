@@ -3,6 +3,11 @@ import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { isEmail, isRequired } from "../../../lib/utils/validation";
 import { createControlledReg } from "../../../lib/utils/createControlledReg";
+import { useMutation } from "react-query";
+import { PropsSign, userApi } from "../../../apis/user";
+import { useAlert } from "../../../hooks/useAlert";
+import { useSetAtom } from "jotai";
+import { accessTokenAtom } from "../../../store/atoms";
 
 const ID = "id";
 const PW = "password";
@@ -12,6 +17,20 @@ export const useSignIn = () => {
   const navigate = useNavigate();
   const [isChecked, setIsChecked] = React.useState(false);
   const createReg = createControlledReg(control);
+  const { openAlert, Alert } = useAlert();
+  const setAccessToken = useSetAtom(accessTokenAtom);
+  const mutation = useMutation({
+    mutationFn: async ({ email, password }: PropsSign) => {
+      return await userApi.signIn({ email, password });
+    },
+    onSuccess: (res) => {
+      setAccessToken(res.data.accessToken);
+      navigate("/upload");
+    },
+    onError: () => {
+      openAlert();
+    },
+  });
 
   const reg = {
     email: createReg(ID, {
@@ -23,8 +42,9 @@ export const useSignIn = () => {
   };
 
   const onSubmit = handleSubmit(async (data) => {
+    const { id, password } = data;
     localStorage.setItem(ID, isChecked ? getValues(ID) : "");
-    console.log(data);
+    mutation.mutate({ email: id, password });
   });
 
   const toggleSaveId = () => {
@@ -36,5 +56,5 @@ export const useSignIn = () => {
     savedId && setValue(ID, savedId);
   }, [setValue]);
 
-  return { reg, onSubmit, setValue, toggleSaveId, navigate };
+  return { reg, onSubmit, setValue, toggleSaveId, navigate, Alert };
 };

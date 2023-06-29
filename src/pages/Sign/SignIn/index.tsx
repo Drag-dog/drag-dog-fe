@@ -7,12 +7,15 @@ import { IdField, SaveIdCheckBox } from "./components";
 import { PwField, MainCtaBtn } from "../../../components/molecules";
 
 export const SignIn = () => {
-  const { reg, onSubmit, setValue, toggleSaveId, navigate } = useSignIn();
+  const { reg, onSubmit, setValue, toggleSaveId, navigate, Alert } = useSignIn();
 
   return (
     <>
       <PageLayout>
         <PageLayout.Title />
+        <PageLayout.Absolute>
+          <Alert>로그인에 실패했습니다</Alert>
+        </PageLayout.Absolute>
         <PageLayout.SubTitle>
           <Typography variant="h1">Sign In</Typography>
         </PageLayout.SubTitle>
