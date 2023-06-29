@@ -4,6 +4,8 @@ import { Title } from "../molecules/Title";
 import PortraitIcon from "@mui/icons-material/Portrait";
 import { useIsSignIn } from "../../hooks/useIsSignIn";
 import { useNavigate } from "react-router-dom";
+import { useSetAtom } from "jotai";
+import { accessTokenAtom } from "../../store/atoms";
 
 type Props = {
   menu?: React.ReactNode[];
@@ -12,6 +14,7 @@ type Props = {
 export const MainHeader = ({ menu }: Props) => {
   const { isSignIn } = useIsSignIn();
   const navigate = useNavigate();
+  const setAccessToken = useSetAtom(accessTokenAtom);
   return (
     <Toolbar
       variant="dense"
@@ -37,7 +40,12 @@ export const MainHeader = ({ menu }: Props) => {
 
       {isSignIn ? (
         // [Todo] 로그아웃 구현 필요
-        <Button onClick={() => {}}>
+        <Button
+          onClick={() => {
+            setAccessToken("");
+            navigate("/");
+          }}
+        >
           <PortraitIcon />
           &nbsp;
           <Typography>로그아웃</Typography>

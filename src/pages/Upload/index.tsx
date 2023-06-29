@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 export const Upload = () => {
   const { isSignIn } = useIsSignIn();
+  const navigate = useNavigate();
   const posts = [
     {
       id: 1,
@@ -46,13 +47,13 @@ export const Upload = () => {
   ];
 
   // [Todo] 선택된 제안서 상태관리
-  const [selectedProposal, serSelectedProposal] = React.useState(false);
+  // const [selectedProposal, serSelectedProposal] = React.useState(false);
 
-  // React.useLayoutEffect(() => {
-  //   if (!isSignIn) {
-  //     navigate("/sign-in");
-  //   }
-  // }, [isSignIn, navigate]);
+  React.useLayoutEffect(() => {
+    if (!isSignIn) {
+      navigate("/sign-in");
+    }
+  }, [isSignIn, navigate]);
 
   return (
     <PageLayout>
