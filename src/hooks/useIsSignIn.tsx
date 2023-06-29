@@ -4,6 +4,5 @@ import { useAtomValue } from "jotai";
 
 export const useIsSignIn = () => {
   const isSignIn = useAtomValue(accessTokenAtom);
-
   return { isSignIn };
 };
