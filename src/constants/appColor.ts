@@ -9,7 +9,8 @@ const originColor = {
   pastelYellow: "#F3EFE0",
   turquoise: "#22A39F",
   blue: "#1932B9",
-  lightBlue: "#7584D5",
+  lightBlue1: "#e9e9f8",
+  lightBlue2: "#7584D5",
   greyBlue: "#4C5A67",
 };
 
@@ -18,5 +19,5 @@ export const appColor = {
   backGround: originColor.white,
   border: originColor.grey2,
   text: originColor.grey3,
-  primary: originColor.lightBlue,
+  primary: originColor.lightBlue2,
 };

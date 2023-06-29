@@ -14,10 +14,43 @@ const authorizationHeader = (accessToken: string): AxiosRequestConfig => {
   };
 };
 
+const pdfHeader = (accessToken: string): AxiosRequestConfig => {
+  return {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      ...authorizationHeader(accessToken).headers,
+    },
+  };
+};
+
 const getOneProposal = async ({ query, accessToken }: { query: string; accessToken: string }) => {
   const response = await authInstance.get(`${ROUTE}?query=${query}`, {
     ...authorizationHeader(accessToken),
   });
+
+  return response.data;
+};
+
+const postGenerateProposal = async ({
+  accessToken,
+  referenceFileIds,
+  pdf,
+}: {
+  accessToken: string;
+  referenceFileIds: number[];
+  pdf: File;
+}) => {
+  const formData = new FormData();
+  formData.append("pdf", pdf);
+
+  const response = await authInstance.post(
+    `${ROUTE}/proposals`,
+    {
+      referenceFileIds,
+      pdf: formData,
+    },
+    { ...pdfHeader(accessToken) }
+  );
 
   return response.data;
 };
@@ -30,7 +63,16 @@ const getProposalKeyList = async ({ accessToken }: { accessToken: string }) => {
   return response.data;
 };
 
-// const postProposalPdfSummary
+const postSummarizePdf = async ({ accessToken, file }: { accessToken: string; file: File }) => {
+  const formData = new FormData();
+  formData.append("pdf", file);
+
+  const response = await authInstance.post(`${ROUTE}/pdf/summarize`, formData, {
+    ...pdfHeader(accessToken),
+  });
+  console.log(response); // [Test] res 이상
+  return response.data;
+};
 
 const getProposalInfoList = async ({ accessToken }: { accessToken: string }) => {
   const response = await authInstance.get(`${ROUTE}/file-infos`, {
@@ -43,5 +85,7 @@ const getProposalInfoList = async ({ accessToken }: { accessToken: string }) => 
 export const proposalApi = {
   getOneProposal,
   getProposalKeyList,
+  postSummarizePdf,
   getProposalInfoList,
+  postGenerateProposal,
 };

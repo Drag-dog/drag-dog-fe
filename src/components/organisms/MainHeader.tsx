@@ -25,6 +25,7 @@ export const MainHeader = ({ menu }: Props) => {
         top: -1,
         backdropFilter: "blur(1px)",
         width: "100%",
+        zIndex: 100,
       }}
     >
       <Title />
