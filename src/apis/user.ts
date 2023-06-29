@@ -1,12 +1,12 @@
 import axios from "axios";
 import { ENV } from "../constants/env";
 
-const ROUTE = "api/user";
+const ROUTE = "api/users";
 const authInstance = axios.create({
   baseURL: ENV.BASE_URL,
 });
 
-const signIn = async (email: string, password: string) => {
+const signIn = async ({ email, password }: PropsSign) => {
   const response = await authInstance.post(`${ROUTE}/sign-in/email`, {
     email,
     password,
@@ -15,7 +15,7 @@ const signIn = async (email: string, password: string) => {
   return response.data;
 };
 
-const signUp = async (email: string, password: string) => {
+const signUp = async ({ email, password }: PropsSign) => {
   const response = await authInstance.post(`${ROUTE}/sign-up/email`, {
     email,
     password,
@@ -27,4 +27,9 @@ const signUp = async (email: string, password: string) => {
 export const userApi = {
   signIn,
   signUp,
+};
+
+export type PropsSign = {
+  email: string;
+  password: string;
 };

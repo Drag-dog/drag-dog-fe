@@ -7,12 +7,33 @@ import {
   isMinLength,
   isEmail,
 } from "../../../lib/utils/validation";
+import { PropsSign, userApi } from "../../../apis/user";
+import { useMutation } from "react-query";
+import { useNavigate } from "react-router-dom";
+import { useAlert } from "../../../hooks/useAlert";
+import React from "react";
 
 const EMAIL = "email";
 const PW = "password";
 const CONFIRM_PW = "confirm_password";
 
 export const useSignUp = () => {
+  const navigate = useNavigate();
+  const { openAlert, Alert } = useAlert();
+  const mutation = useMutation({
+    mutationFn: async ({ email, password }: PropsSign) => {
+      return await userApi.signUp({ email, password });
+    },
+    onSuccess: () => {
+      navigate("/sign-in");
+    },
+    onError: () => {
+      openAlert();
+    },
+  });
+
+  React.useEffect(() => {}, []);
+
   const {
     control,
     handleSubmit,
@@ -45,8 +66,9 @@ export const useSignUp = () => {
   };
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log(data, "sdd");
+    const { email, password } = data;
+    mutation.mutate({ email, password });
   });
 
-  return { reg, errors, onSubmit };
+  return { isLoading: mutation.isLoading, reg, errors, onSubmit, Alert };
 };
