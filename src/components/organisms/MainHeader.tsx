@@ -40,7 +40,6 @@ export const MainHeader = ({ menu }: Props) => {
       </Stack>
 
       {isSignIn ? (
-        // [Todo] 로그아웃 구현 필요
         <Button
           onClick={() => {
             setAccessToken("");

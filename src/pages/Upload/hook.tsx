@@ -3,16 +3,18 @@ import { useNavigate } from "react-router-dom";
 import { useMutation } from "react-query";
 import { useIsSignIn } from "../../hooks/useIsSignIn";
 import { proposalApi } from "../../apis/proposal";
-import { useAtomValue } from "jotai";
-import { accessTokenAtom } from "../../store/atoms";
+import { useAtomValue, useSetAtom } from "jotai";
+import { accessTokenAtom, resProposalsAtom } from "../../store/atoms";
 import { useAlert } from "../../hooks/useAlert";
 
 export const useUpload = () => {
-  const { isSignIn } = useIsSignIn();
   const accessToken = useAtomValue(accessTokenAtom);
   const navigate = useNavigate();
   const { openAlert, Alert } = useAlert();
   const [posts, setPosts] = React.useState<{ id: number; name: string }[]>([]);
+  const { isSignIn } = useIsSignIn();
+  const [summary, setSummary] = React.useState({});
+  const setResProposal = useSetAtom(resProposalsAtom);
 
   const mutGetFileInfoList = useMutation({
     mutationFn: async () => {
@@ -31,7 +33,8 @@ export const useUpload = () => {
     mutationFn: async (file: File) => {
       return await proposalApi.postSummarizePdf({ accessToken, file });
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
+      setSummary(res);
       mutGetFileInfoList.mutate();
     },
     onError: () => {
@@ -45,8 +48,8 @@ export const useUpload = () => {
       return await proposalApi.postGenerateProposal({ accessToken, pdf, referenceFileIds });
     },
     onSuccess: (res) => {
-      // [Test]
-      console.log(res);
+      setResProposal(res);
+      navigate("/success");
     },
     onError: () => {
       openAlert();
@@ -70,10 +73,9 @@ export const useUpload = () => {
 
   React.useLayoutEffect(() => {
     // [Error] 토큰이 있는데 로그인 페이지로 이동하는 문제
-    if (!isSignIn) {
-      navigate("/sign-in");
-    }
-  });
+    if (!isSignIn) navigate("/sign-in");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     posts,
@@ -81,7 +83,10 @@ export const useUpload = () => {
     onCheck,
     postSummarizePdf: mutSummaizePdf.mutate,
     generateProposal: mutGenerateProposal.mutate,
-    isLoading: mutSummaizePdf.isLoading || mutGenerateProposal.isLoading,
+    isSummaryLoading: mutSummaizePdf.isLoading,
+    isSummarySuccess: mutSummaizePdf.isSuccess,
+    isGenerateLoading: mutGenerateProposal.isLoading,
     Alert,
+    summary,
   };
 };

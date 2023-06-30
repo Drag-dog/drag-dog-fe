@@ -42,15 +42,9 @@ const postGenerateProposal = async ({
 }) => {
   const formData = new FormData();
   formData.append("pdf", pdf);
+  formData.append("referenceFileIds", JSON.stringify(referenceFileIds));
 
-  const response = await authInstance.post(
-    `${ROUTE}/proposals`,
-    {
-      referenceFileIds,
-      pdf: formData,
-    },
-    { ...pdfHeader(accessToken) }
-  );
+  const response = await authInstance.post(`${ROUTE}`, formData, { ...pdfHeader(accessToken) });
 
   return response.data;
 };
@@ -70,7 +64,6 @@ const postSummarizePdf = async ({ accessToken, file }: { accessToken: string; fi
   const response = await authInstance.post(`${ROUTE}/pdf/summarize`, formData, {
     ...pdfHeader(accessToken),
   });
-  console.log(response); // [Test] res 이상
   return response.data;
 };
 
