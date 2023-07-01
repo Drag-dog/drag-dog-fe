@@ -76,13 +76,13 @@ export const Upload = () => {
                 variant="contained"
                 component="label"
                 sx={{
-                  width: "25%",
+                  width: "30%",
                   height: "4rem",
                   display: "flex",
                   flexDirection: "column",
                 }}
               >
-                <Typography>새로운 사업 계획서 추가</Typography>
+                <Typography>학습시킬 사업 계획서 추가</Typography>
                 <input
                   style={{ display: "none" }}
                   type="file"

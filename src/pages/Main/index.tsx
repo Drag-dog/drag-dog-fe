@@ -6,6 +6,7 @@ import { Empty } from "../../components/atoms";
 import mainAsset1 from "../../assets/main-asset1.jpeg";
 import mainAsset2 from "../../assets/main-asset2.jpeg";
 import { useNavigate } from "react-router-dom";
+import dragDog from "../../assets/dragDog.png";
 
 export const Main = () => {
   const navigate = useNavigate();
@@ -13,6 +14,10 @@ export const Main = () => {
     <PageLayout>
       <PageLayout.Title />
       <PageLayout.Body>
+        <Typography variant="h4">GPT를 이용한 사업계획서 생성 서비스</Typography>
+        <Empty height="1rem" />
+        <img src={dragDog} alt="drag dog" style={{ width: "50%" }} />
+        <Empty height="5rem" />
         <Typography variant="body1">완성된 사업계획서를 Drag dog에 넣으면?</Typography>
         <Empty height="2rem" />
         <img
