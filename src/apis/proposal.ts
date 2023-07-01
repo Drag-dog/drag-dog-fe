@@ -23,14 +23,6 @@ const pdfHeader = (accessToken: string): AxiosRequestConfig => {
   };
 };
 
-const getOneProposal = async ({ query, accessToken }: { query: string; accessToken: string }) => {
-  const response = await authInstance.get(`${ROUTE}?query=${query}`, {
-    ...authorizationHeader(accessToken),
-  });
-
-  return response.data;
-};
-
 const postGenerateProposal = async ({
   accessToken,
   referenceFileIds,
@@ -75,10 +67,22 @@ const getProposalInfoList = async ({ accessToken }: { accessToken: string }) => 
   return response.data;
 };
 
+const deleteProposalSummary = async ({
+  accessToken,
+  proposalKey,
+}: {
+  accessToken: string;
+  proposalKey: number;
+}) => {
+  await authInstance.delete(`${ROUTE}/summary?ids=${proposalKey}`, {
+    ...authorizationHeader(accessToken),
+  });
+};
+
 export const proposalApi = {
-  getOneProposal,
   getProposalKeyList,
   postSummarizePdf,
   getProposalInfoList,
   postGenerateProposal,
+  deleteProposalSummary,
 };

@@ -6,9 +6,9 @@ import { appColor } from "../../constants/appColor";
 import { useUpload } from "./hook";
 import { Loading } from "../../components/molecules";
 import { ProposalList } from "./ProposalList";
-import loadingDog from "../../assets/loading.png";
 import { sizes } from "../../constants/sizes";
 import { useModal } from "../../hooks/useModal";
+import { LoadingComponent } from "./Loading";
 
 export const Upload = () => {
   const {
@@ -17,6 +17,7 @@ export const Upload = () => {
     onCheck,
     postSummarizePdf,
     generateProposal,
+    onDelete,
     isSummaryLoading,
     isGenerateLoading,
     isSummarySuccess,
@@ -29,6 +30,9 @@ export const Upload = () => {
     if (isSummarySuccess) handleOpen();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // [Todo] 4103 invalid token 에러 처리
+  // [Todo] 스르륵 올라오는 애니메이션 추가
 
   return (
     <PageLayout>
@@ -53,17 +57,7 @@ export const Upload = () => {
       </PageLayout.Absolute>
       <PageLayout.Body>
         {isGenerateLoading ? (
-          <>
-            <Typography>사업 계획서를 작성하는 중입니다</Typography>
-            <Typography>잠시만 기다려주세요!</Typography>
-            <img
-              src={loadingDog}
-              alt="loading"
-              style={{
-                width: "50%",
-              }}
-            />
-          </>
+          <LoadingComponent />
         ) : (
           <>
             <Typography>학습시킬 사업 계획서를 선택해주세요!</Typography>
@@ -77,6 +71,7 @@ export const Upload = () => {
                 <ProposalList
                   posts={posts}
                   onCheck={onCheck}
+                  onDelete={onDelete}
                   isSelectedProposalList={isSelectedProposalList}
                 />
                 <Empty height="5rem" />

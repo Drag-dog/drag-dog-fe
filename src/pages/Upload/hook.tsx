@@ -44,12 +44,23 @@ export const useUpload = () => {
 
   const mutGenerateProposal = useMutation({
     mutationFn: async ({ pdf, referenceFileIds }: { pdf: File; referenceFileIds: number[] }) => {
-      console.log(referenceFileIds);
       return await proposalApi.postGenerateProposal({ accessToken, pdf, referenceFileIds });
     },
     onSuccess: (res) => {
       setResProposal(res);
       navigate("/success");
+    },
+    onError: () => {
+      openAlert();
+    },
+  });
+
+  const mutDeleteProposalSummary = useMutation({
+    mutationFn: async (proposalKey: number) => {
+      await proposalApi.deleteProposalSummary({ accessToken, proposalKey });
+    },
+    onSuccess: () => {
+      mutGetFileInfoList.mutate();
     },
     onError: () => {
       openAlert();
@@ -66,6 +77,10 @@ export const useUpload = () => {
     });
   };
 
+  const onDelete = (proposalId: number) => {
+    mutDeleteProposalSummary.mutate(proposalId);
+  };
+
   React.useLayoutEffect(() => {
     mutGetFileInfoList.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -77,12 +92,14 @@ export const useUpload = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // [Todo] 리팩터링 필요
   return {
     posts,
     isSelectedProposalList,
     onCheck,
     postSummarizePdf: mutSummaizePdf.mutate,
     generateProposal: mutGenerateProposal.mutate,
+    onDelete,
     isSummaryLoading: mutSummaizePdf.isLoading,
     isSummarySuccess: mutSummaizePdf.isSuccess,
     isGenerateLoading: mutGenerateProposal.isLoading,
