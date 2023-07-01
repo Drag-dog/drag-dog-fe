@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal as MuiModal } from "@mui/material";
 import { Box } from "@mui/system";
+import { sizes } from "../constants/sizes";
 
 export const useModal = () => {
   const [open, setOpen] = React.useState(false);
@@ -9,23 +10,27 @@ export const useModal = () => {
 
   const Modal = ({ children }: { children: React.ReactNode }) => {
     return (
-      <MuiModal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
+      <MuiModal open={open} onClose={handleClose}>
         <Box
           sx={{
-            position: "absolute" as "absolute",
+            position: "absolute",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",
-            width: 400,
+            width: "80%",
+            height: "80%",
+            maxWidth: sizes.pageMaxWidth,
             bgcolor: "background.paper",
             border: "2px solid #000",
             boxShadow: 24,
             p: 4,
+            overflow: "scroll",
+            "&::-webkit-scrollbar": {
+              width: "0",
+            },
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
           }}
         >
           {children}

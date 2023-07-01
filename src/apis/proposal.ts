@@ -79,10 +79,25 @@ const deleteProposalSummary = async ({
   });
 };
 
+const getPropsalSummary = async ({
+  accessToken,
+  proposalKey,
+}: {
+  accessToken: string;
+  proposalKey: number;
+}) => {
+  const response = await authInstance.get(`${ROUTE}/summary/{id}?id=${proposalKey}`, {
+    ...authorizationHeader(accessToken),
+  });
+
+  return response.data;
+};
+
 export const proposalApi = {
   getProposalKeyList,
   postSummarizePdf,
   getProposalInfoList,
   postGenerateProposal,
+  getPropsalSummary,
   deleteProposalSummary,
 };

@@ -7,7 +7,6 @@ import { useUpload } from "./hook";
 import { Loading } from "../../components/molecules";
 import { ProposalList } from "./ProposalList";
 import { sizes } from "../../constants/sizes";
-import { useModal } from "../../hooks/useModal";
 import { LoadingComponent } from "./Loading";
 
 export const Upload = () => {
@@ -20,16 +19,10 @@ export const Upload = () => {
     onDelete,
     isSummaryLoading,
     isGenerateLoading,
-    isSummarySuccess,
+    getPropsalSummary,
     Alert,
-    summary,
+    SummaryModal,
   } = useUpload();
-  const { handleOpen, Modal } = useModal();
-
-  React.useEffect(() => {
-    if (isSummarySuccess) handleOpen();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   // [Todo] 4103 invalid token 에러 처리
   // [Todo] 스르륵 올라오는 애니메이션 추가
@@ -43,17 +36,7 @@ export const Upload = () => {
       <PageLayout.Absolute>
         {isSummaryLoading && <Loading />}
         <Alert>오류가 발생했습니다.</Alert>
-        <Modal>
-          <Typography variant="h4">요약 결과</Typography>
-          <Empty height="1rem" />
-          {Object.entries(summary).map(([key, value]) => (
-            <>
-              <Typography key={key}>{key}</Typography>
-              <Typography key={key}>{value as string}</Typography>
-              <Empty height="1rem" />
-            </>
-          ))}
-        </Modal>
+        <SummaryModal />
       </PageLayout.Absolute>
       <PageLayout.Body>
         {isGenerateLoading ? (
@@ -72,6 +55,7 @@ export const Upload = () => {
                   posts={posts}
                   onCheck={onCheck}
                   onDelete={onDelete}
+                  onClick={getPropsalSummary}
                   isSelectedProposalList={isSelectedProposalList}
                 />
                 <Empty height="5rem" />
