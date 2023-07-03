@@ -86,7 +86,7 @@ const getPropsalSummary = async ({
   accessToken: string;
   proposalKey: number;
 }) => {
-  const response = await authInstance.get(`${ROUTE}/summary/{id}?id=${proposalKey}`, {
+  const response = await authInstance.get(`${ROUTE}/summary/${proposalKey}`, {
     ...authorizationHeader(accessToken),
   });
 
