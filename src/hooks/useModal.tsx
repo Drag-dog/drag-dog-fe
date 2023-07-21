@@ -39,5 +39,5 @@ export const useModal = () => {
     );
   };
 
-  return { handleOpen, Modal };
+  return { handleOpen, handleClose, Modal };
 };

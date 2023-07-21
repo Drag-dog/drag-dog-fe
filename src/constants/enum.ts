@@ -4,4 +4,5 @@ export const enum TOKEN {
 
 export const enum NAME {
   PROPOSAL = "proposal",
+  QUESTION = "question",
 }

@@ -2,7 +2,6 @@ import React from "react";
 import { PageLayout } from "../../components/layouts/PageLayout";
 import { Typography, Button } from "@mui/material";
 import { Empty } from "../../components/atoms";
-import { appColor } from "../../constants/appColor";
 import { useUpload } from "./hook";
 import { Loading } from "../../components/molecules";
 import { ProposalList } from "./ProposalList";
@@ -15,18 +14,18 @@ export const Upload = () => {
     isSelectedProposalList,
     onCheck,
     postSummarizePdf,
-    generateProposal,
     onDelete,
     isSummaryLoading,
     isGenerateLoading,
     getPropsalSummary,
     Alert,
     SummaryModal,
+    openUploadModal,
+    UploadModal,
   } = useUpload();
 
   // [Todo] 4103 invalid token 에러 처리
   // [Todo] 스르륵 올라오는 애니메이션 추가
-
   return (
     <PageLayout>
       <PageLayout.Title />
@@ -37,6 +36,7 @@ export const Upload = () => {
         {isSummaryLoading && <Loading />}
         <Alert>오류가 발생했습니다.</Alert>
         <SummaryModal />
+        <UploadModal />
       </PageLayout.Absolute>
       <PageLayout.Body>
         {isGenerateLoading ? (
@@ -102,28 +102,9 @@ export const Upload = () => {
                   display: "flex",
                   flexDirection: "column",
                 }}
+                onClick={() => openUploadModal()}
               >
                 <Typography>사업 계획서 작성하기</Typography>
-                <Typography variant="caption" color={appColor.lightBlue1}>
-                  빈 양식을 넣어주세요!
-                </Typography>
-
-                <input
-                  style={{ display: "none" }}
-                  type="file"
-                  accept="application/pdf"
-                  onChange={(e) => {
-                    if (!e.target.files?.[0]) return;
-                    const referenceFileIds = posts
-                      .map((post, i) => (isSelectedProposalList[i] ? post.id : null))
-                      .filter((id) => id !== null) as number[];
-
-                    generateProposal({
-                      referenceFileIds,
-                      pdf: e.target.files[0],
-                    });
-                  }}
-                />
               </Button>
             </div>
           </>

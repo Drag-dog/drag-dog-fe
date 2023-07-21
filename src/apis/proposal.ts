@@ -2,7 +2,7 @@ import axios, { AxiosRequestConfig } from "axios";
 import { ENV } from "../constants/env";
 
 const ROUTE = "api/proposals";
-const authInstance = axios.create({
+const proposalInstance = axios.create({
   baseURL: ENV.BASE_URL,
 });
 
@@ -23,6 +23,9 @@ const pdfHeader = (accessToken: string): AxiosRequestConfig => {
   };
 };
 
+/**
+ * @deprecated
+ */
 const postGenerateProposal = async ({
   accessToken,
   referenceFileIds,
@@ -36,13 +39,40 @@ const postGenerateProposal = async ({
   formData.append("pdf", pdf);
   formData.append("referenceFileIds", JSON.stringify(referenceFileIds));
 
-  const response = await authInstance.post(`${ROUTE}`, formData, { ...pdfHeader(accessToken) });
+  const response = await proposalInstance.post(`${ROUTE}`, formData, { ...pdfHeader(accessToken) });
+
+  return response.data;
+};
+
+const postAnswerProposal = async ({
+  accessToken,
+  contentsToInclude,
+  characterLimit,
+  referenceFileIds,
+  noteWhenWriting,
+  question,
+  answerType,
+}: PropsPostAnswerProposal) => {
+  const response = await proposalInstance.post(
+    `${ROUTE}/answer`,
+    {
+      contentsToInclude,
+      characterLimit,
+      referenceFileIds,
+      noteWhenWriting,
+      question,
+      answerType,
+    },
+    {
+      ...authorizationHeader(accessToken),
+    }
+  );
 
   return response.data;
 };
 
 const getProposalKeyList = async ({ accessToken }: { accessToken: string }) => {
-  const response = await authInstance.get(`${ROUTE}/keys`, {
+  const response = await proposalInstance.get(`${ROUTE}/keys`, {
     ...authorizationHeader(accessToken),
   });
 
@@ -53,14 +83,14 @@ const postSummarizePdf = async ({ accessToken, file }: { accessToken: string; fi
   const formData = new FormData();
   formData.append("pdf", file);
 
-  const response = await authInstance.post(`${ROUTE}/pdf/summarize`, formData, {
+  const response = await proposalInstance.post(`${ROUTE}/pdf/summarize`, formData, {
     ...pdfHeader(accessToken),
   });
   return response.data;
 };
 
 const getProposalInfoList = async ({ accessToken }: { accessToken: string }) => {
-  const response = await authInstance.get(`${ROUTE}/file-infos`, {
+  const response = await proposalInstance.get(`${ROUTE}/file-infos`, {
     ...authorizationHeader(accessToken),
   });
 
@@ -74,7 +104,7 @@ const deleteProposalSummary = async ({
   accessToken: string;
   proposalKey: number;
 }) => {
-  await authInstance.delete(`${ROUTE}/summary?ids=${proposalKey}`, {
+  await proposalInstance.delete(`${ROUTE}/summary?ids=${proposalKey}`, {
     ...authorizationHeader(accessToken),
   });
 };
@@ -86,7 +116,7 @@ const getPropsalSummary = async ({
   accessToken: string;
   proposalKey: number;
 }) => {
-  const response = await authInstance.get(`${ROUTE}/summary/${proposalKey}`, {
+  const response = await proposalInstance.get(`${ROUTE}/summary/${proposalKey}`, {
     ...authorizationHeader(accessToken),
   });
 
@@ -97,7 +127,17 @@ export const proposalApi = {
   getProposalKeyList,
   postSummarizePdf,
   getProposalInfoList,
-  postGenerateProposal,
   getPropsalSummary,
   deleteProposalSummary,
+  postAnswerProposal,
+};
+
+export type PropsPostAnswerProposal = {
+  accessToken: string;
+  contentsToInclude: string[];
+  characterLimit: number;
+  referenceFileIds: string[];
+  noteWhenWriting: string[];
+  question: string;
+  answerType: string;
 };
