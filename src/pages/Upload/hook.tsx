@@ -15,6 +15,7 @@ import Button from "@mui/material/Button/Button";
 import RadioGroup from "@mui/material/RadioGroup/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
 import Radio from "@mui/material/Radio/Radio";
+import Stack from "@mui/material/Stack/Stack";
 
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
@@ -91,20 +92,27 @@ export const useUpload = () => {
   const SummaryModal = () => {
     return (
       <summaryModal.Modal>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h4">요약된 사업계획서</Typography>
+          <Empty height="0.5rem" />
+          <Typography variant="caption">(요약된 사업계획서의 내용도 수정가능합니다)</Typography>
+        </div>
         <Empty height="1rem" />
-        {Object.entries(summary).map(([key, value]) => (
+        {Object.entries(summary).map(([key, value], idx) => (
           <>
-            <ListItem
-              key={key}
-              sx={{
-                flexDirection: "column",
-                width: "80%",
-                margin: "0 auto",
-              }}
-            >
-              <Typography variant="h5">{key}</Typography>
-              <Empty height="0.5rem" />
-              <Typography>{value}</Typography>
+            <ListItem key={key} sx={{ flexDirection: "column" }}>
+              <Stack direction="column" spacing={2} sx={{ width: "100%" }}>
+                <Typography variant="h5">{`${idx + 1}.  ${key}`}</Typography>
+                <TextField multiline defaultValue={value} sx={{ width: "100%" }} />
+              </Stack>
+              <Empty height="1rem" />
             </ListItem>
             <Empty height="1rem" />
           </>

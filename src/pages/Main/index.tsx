@@ -6,7 +6,7 @@ import { Empty } from "../../components/atoms";
 import mainAsset1 from "../../assets/main-asset1.jpeg";
 import mainAsset2 from "../../assets/main-asset2.jpeg";
 import { useNavigate } from "react-router-dom";
-import dragDog from "../../assets/dragDog.png";
+import dragDog from "../../assets/dragDog.jpeg";
 
 export const Main = () => {
   const navigate = useNavigate();

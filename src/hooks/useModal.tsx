@@ -10,7 +10,7 @@ export const useModal = () => {
 
   const Modal = ({ children }: { children: React.ReactNode }) => {
     return (
-      <MuiModal open={open} onClose={handleClose}>
+      <MuiModal sx={{ height: "100%" }} open={open} onClose={handleClose}>
         <Box
           sx={{
             position: "absolute",
@@ -21,16 +21,10 @@ export const useModal = () => {
             height: "80%",
             maxWidth: sizes.pageMaxWidth,
             bgcolor: "background.paper",
-            border: "2px solid #000",
             boxShadow: 24,
             p: 4,
             overflow: "scroll",
-            "&::-webkit-scrollbar": {
-              width: "0",
-            },
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
+            "&::-webkit-scrollbar": { width: 0 },
           }}
         >
           {children}

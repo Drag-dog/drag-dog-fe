@@ -44,6 +44,9 @@ export const Upload = () => {
         ) : (
           <>
             <Typography>학습시킬 사업 계획서를 선택해주세요!</Typography>
+            <Typography variant="caption">
+              (업로드한 사업 계획서를 클릭하시면 요약된 정보를 확인 가능합니다)
+            </Typography>
             <Empty height="2rem" />
             {posts.length === 0 ? (
               <div style={{ width: "100%" }}>
