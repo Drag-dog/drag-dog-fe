@@ -3,7 +3,7 @@ import { PageLayout } from "../../components/layouts/PageLayout";
 import { Typography, Button } from "@mui/material";
 import { Empty } from "../../components/atoms";
 import { useUpload } from "./hook";
-import { Loading } from "../../components/molecules";
+import { useLoading } from "../../hooks/useLoading";
 import { ProposalList } from "./ProposalList";
 import { sizes } from "../../constants/sizes";
 import { LoadingComponent } from "./Loading";
@@ -23,6 +23,7 @@ export const Upload = () => {
     openUploadModal,
     UploadModal,
   } = useUpload();
+  const { Loading } = useLoading();
 
   // [Todo] 4103 invalid token 에러 처리
   // [Todo] 스르륵 올라오는 애니메이션 추가
@@ -93,22 +94,49 @@ export const Upload = () => {
                   onChange={(e) => {
                     if (!e.target.files?.[0]) return;
                     postSummarizePdf(e.target.files[0]);
+                    e.target.files = null;
+                    e.target.value = "";
                   }}
                 />
               </Button>
-              <Button
-                variant="contained"
-                component="label"
-                sx={{
-                  width: "50%",
-                  height: "4rem",
+              <div
+                style={{
                   display: "flex",
-                  flexDirection: "column",
+                  width: "50%",
                 }}
-                onClick={() => openUploadModal()}
               >
-                <Typography>사업 계획서 작성하기</Typography>
-              </Button>
+                <Button
+                  variant="contained"
+                  component="label"
+                  sx={{
+                    width: "50%",
+                    height: "4rem",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  onClick={() => openUploadModal()}
+                >
+                  <Typography>기존 항목 검색</Typography>
+                  <Typography variant="caption">(기존 항목 검색)</Typography>
+                </Button>
+                <Empty width="1rem" />
+                <Button
+                  variant="contained"
+                  component="label"
+                  sx={{
+                    width: "50%",
+                    height: "4rem",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  onClick={() => openUploadModal()}
+                >
+                  <Typography>AI 사업 계획서 작성하기</Typography>
+                  <Typography variant="caption">
+                    (새 양식에 맞게 사업 계획서를 작성합니다.)
+                  </Typography>
+                </Button>
+              </div>
             </div>
           </>
         )}

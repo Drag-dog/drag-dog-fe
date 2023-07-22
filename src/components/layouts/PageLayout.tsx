@@ -14,7 +14,7 @@ const Layout = styled("div")({
   margin: "auto",
 });
 
-type Props = { children: React.ReactNode };
+type Props = { children?: React.ReactNode };
 
 const Main = ({ children }: Props) => {
   const [TitleComponenets] = getChildrenByName(children, "Title");

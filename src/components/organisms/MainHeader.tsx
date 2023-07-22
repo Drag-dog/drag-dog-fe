@@ -7,11 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useSetAtom } from "jotai";
 import { accessTokenAtom } from "../../store/atoms";
 
-type Props = {
-  menu?: React.ReactNode[];
-};
-
-export const MainHeader = ({ menu }: Props) => {
+export const MainHeader = () => {
   const { isSignIn } = useIsSignIn();
   const navigate = useNavigate();
   const setAccessToken = useSetAtom(accessTokenAtom);
@@ -35,9 +31,7 @@ export const MainHeader = ({ menu }: Props) => {
         divider={<Divider orientation="vertical" flexItem />}
         spacing={2}
         sx={{ marginLeft: 2, flexGrow: 1 }}
-      >
-        {menu}
-      </Stack>
+      ></Stack>
 
       {isSignIn ? (
         <Button

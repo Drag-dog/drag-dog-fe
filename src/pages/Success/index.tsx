@@ -26,7 +26,7 @@ export const Success = () => {
                 ■ {answer}
               </Typography>
               <Empty height="1rem" />
-              {additional.map((str, idx) => (
+              {additional?.map((str, idx) => (
                 <>
                   <Typography key={idx}>- {str}</Typography>
                   <Empty height="0.5rem" />

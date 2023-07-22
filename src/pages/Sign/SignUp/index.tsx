@@ -3,17 +3,19 @@ import { PageLayout } from "../../../components/layouts/PageLayout";
 import { Typography } from "@mui/material";
 import { useSignUp } from "./hook";
 import { Form } from "../../../components/atoms";
-import { PwField, InputMulti, MainCtaBtn, Loading } from "../../../components/molecules";
+import { PwField, InputMulti, MainCtaBtn } from "../../../components/molecules";
+import { useLoading } from "../../../hooks/useLoading";
 import { Empty } from "../../../components/atoms";
 import { IdField } from "../SignIn/components";
 
 export const SignUp = () => {
   const { isLoading, reg, errors, onSubmit, Alert } = useSignUp();
+  const { Loading } = useLoading();
+
   return (
     <>
       <PageLayout>
         <PageLayout.Title />
-
         <PageLayout.Absolute>
           {isLoading && <Loading />}
           <Alert>회원가입에 실패하였습니다</Alert>

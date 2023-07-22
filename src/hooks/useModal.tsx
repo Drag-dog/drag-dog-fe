@@ -18,7 +18,7 @@ export const useModal = () => {
             left: "50%",
             transform: "translate(-50%, -50%)",
             width: "80%",
-            height: "80%",
+            height: "90%",
             maxWidth: sizes.pageMaxWidth,
             bgcolor: "background.paper",
             boxShadow: 24,
