@@ -120,6 +120,7 @@ export const useUpload = () => {
             alignItems: "center",
           }}
         >
+          {/* [Todo] 여기도 Accordion으로 바꿀까? */}
           <Typography variant="h4">요약된 사업계획서</Typography>
           <Empty height="0.5rem" />
           <Typography variant="caption">(요약된 사업계획서의 내용도 수정가능합니다)</Typography>
@@ -130,13 +131,18 @@ export const useUpload = () => {
             <ListItem key={key} sx={{ flexDirection: "column" }}>
               <Stack direction="column" spacing={2} sx={{ width: "100%" }}>
                 <Typography variant="h5">{`${idx + 1}.  ${key}`}</Typography>
-                <TextField multiline defaultValue={value} sx={{ width: "100%" }} />
+                <TextField multiline rows={4} defaultValue={value} sx={{ width: "100%" }} />
               </Stack>
-              <Empty height="1rem" />
             </ListItem>
             <Empty height="1rem" />
           </>
         ))}
+        <Empty height="1rem" />
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <Button variant="contained" sx={{ width: "50%", height: "4rem" }}>
+            수정하기
+          </Button>
+        </div>
       </summaryModal.Modal>
     );
   };
