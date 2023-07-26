@@ -22,6 +22,8 @@ export const Upload = () => {
     SummaryModal,
     openUploadModal,
     UploadModal,
+    openContentsSearchModal,
+    ContentsSearchModal,
   } = useUpload();
   const { Loading } = useLoading();
 
@@ -38,6 +40,7 @@ export const Upload = () => {
         <Alert>오류가 발생했습니다.</Alert>
         <SummaryModal />
         <UploadModal />
+        <ContentsSearchModal />
       </PageLayout.Absolute>
       <PageLayout.Body>
         {isGenerateLoading ? (
@@ -114,10 +117,12 @@ export const Upload = () => {
                     display: "flex",
                     flexDirection: "column",
                   }}
-                  onClick={() => openUploadModal()}
+                  onClick={() => openContentsSearchModal()}
                 >
                   <Typography>기존 항목 검색</Typography>
-                  <Typography variant="caption">(기존 항목 검색)</Typography>
+                  <Typography variant="caption">
+                    (기존 내용을 바탕으로 빠르게 검색합니다.)
+                  </Typography>
                 </Button>
                 <Empty width="1rem" />
                 <Button

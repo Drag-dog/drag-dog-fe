@@ -16,6 +16,10 @@ import RadioGroup from "@mui/material/RadioGroup/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
 import Radio from "@mui/material/Radio/Radio";
 import Stack from "@mui/material/Stack/Stack";
+import { AccordionList, Content } from "../../components/organisms/AccordionList";
+import { InputAdornment, IconButton } from "@mui/material";
+import SearchIcon from "@mui/icons-material/Search";
+import { isEmpty } from "../../lib/utils/isEmpty";
 
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
@@ -26,8 +30,10 @@ export const useUpload = () => {
   const { isSignIn } = useIsSignIn();
   const [summary, setSummary] = React.useState<{ [key: string]: string }>({});
   const setResProposal = useSetAtom(resProposalsAtom);
+  const [contents, setContents] = React.useState<Content>({});
   const summaryModal = useModal();
   const uploadModal = useModal();
+  const contentsSearchModal = useModal();
 
   // [Todo] mutaion이 아닌 query로 변경
   const mutGetFileInfoList = useMutation({
@@ -80,6 +86,17 @@ export const useUpload = () => {
       setSummary(res.data);
       summaryModal.handleOpen();
     },
+  });
+
+  const mutSearchContents = useMutation({
+    mutationFn: async (query: string) => {
+      return await proposalApi.getSearchContents({ accessToken, query });
+    },
+    onSuccess: (res) => {
+      setContents(res.data);
+      contentsSearchModal.handleOpen();
+    },
+    onError: () => openAlert(),
   });
 
   const [isSelectedProposalList, setIsSelectedProposalList] = React.useState<boolean[]>([]);
@@ -226,6 +243,62 @@ export const useUpload = () => {
     );
   };
 
+  const ContentsSearchModal = () => {
+    const [query, setQuery] = React.useState<string>("");
+    return (
+      <contentsSearchModal.Modal>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            width: "100%",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Typography variant="h5">기존 항목 검색</Typography>
+          </div>
+          <Empty height="1rem" />
+          <div style={{ display: "flex", alignItems: "baseline" }}>
+            <Typography>사업 계획서의 문항을 입력해주세요.</Typography>
+            <Typography variant="caption">
+              (학습된 기존 사업 계획서를 새로 생성없이 빠르게 확인 가능합니다.)
+            </Typography>
+          </div>
+          <TextField
+            placeholder="ex) 사업 개요"
+            onChange={(e) => {
+              setQuery(e.target.value);
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") mutSearchContents.mutate(query);
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={(e) => {
+                      mutSearchContents.mutate(query);
+                    }}
+                  >
+                    <SearchIcon />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Empty height="2rem" />
+          {!isEmpty(contents) ? (
+            <AccordionList contentList={contents} />
+          ) : (
+            <div style={{ width: "100%", textAlign: "center" }}>
+              <Typography>검색 결과가 없습니다.</Typography>
+            </div>
+          )}
+        </div>
+      </contentsSearchModal.Modal>
+    );
+  };
+
   const onDelete = (proposalId: number) => {
     mutDeleteProposalSummary.mutate(proposalId);
   };
@@ -255,5 +328,7 @@ export const useUpload = () => {
     SummaryModal,
     openUploadModal: uploadModal.handleOpen,
     UploadModal,
+    openContentsSearchModal: contentsSearchModal.handleOpen,
+    ContentsSearchModal,
   };
 };

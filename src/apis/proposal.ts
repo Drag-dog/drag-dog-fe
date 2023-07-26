@@ -79,6 +79,20 @@ const getProposalKeyList = async ({ accessToken }: { accessToken: string }) => {
   return response.data;
 };
 
+const getSearchContents = async ({
+  accessToken,
+  query,
+}: {
+  accessToken: string;
+  query: string;
+}) => {
+  const response = await proposalInstance.get(`${ROUTE}?query=${query}`, {
+    ...authorizationHeader(accessToken),
+  });
+
+  return response.data;
+};
+
 const postSummarizePdf = async ({ accessToken, file }: { accessToken: string; file: File }) => {
   const formData = new FormData();
   formData.append("pdf", file);
@@ -130,6 +144,7 @@ export const proposalApi = {
   getPropsalSummary,
   deleteProposalSummary,
   postAnswerProposal,
+  getSearchContents,
 };
 
 export type PropsPostAnswerProposal = {
