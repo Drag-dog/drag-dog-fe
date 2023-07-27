@@ -6,9 +6,10 @@ import { useIsSignIn } from "../../hooks/useIsSignIn";
 import { useNavigate } from "react-router-dom";
 import { useSetAtom } from "jotai";
 import { accessTokenAtom } from "../../store/atoms";
+import {LOGIN_STATE} from "../../constants/enum";
 
 export const MainHeader = () => {
-  const { isSignIn } = useIsSignIn();
+  const { loginState } = useIsSignIn();
   const navigate = useNavigate();
   const setAccessToken = useSetAtom(accessTokenAtom);
   return (
@@ -33,7 +34,7 @@ export const MainHeader = () => {
         sx={{ marginLeft: 2, flexGrow: 1 }}
       ></Stack>
 
-      {isSignIn ? (
+      {loginState==LOGIN_STATE.LOGGED_IN ? (
         <Button
           onClick={() => {
             setAccessToken("");
