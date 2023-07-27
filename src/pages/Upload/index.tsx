@@ -19,12 +19,12 @@ export const Upload = () => {
     getPropsalSummary,
     Alert,
     SummaryModal,
-    generateProposalSummary,
+    generateNewProposal,
     generateProposalSummaryLoading,
-    openUploadModal,
     openContentsSearchModal,
     ContentsSearchModal,
     SuccessAlert,
+    SelectBoxModal,
   } = useUpload();
   const { Loading } = useLoading();
 
@@ -42,6 +42,7 @@ export const Upload = () => {
         <SummaryModal />
         <ContentsSearchModal />
         <SuccessAlert />
+        <SelectBoxModal />
       </PageLayout.Absolute>
       <PageLayout.Body>
         {generateProposalSummaryLoading ? (
@@ -135,7 +136,6 @@ export const Upload = () => {
                     display: "flex",
                     flexDirection: "column",
                   }}
-                  onClick={() => openUploadModal()}
                 >
                   <Typography>AI 사업 계획서 작성하기</Typography>
                   <Typography variant="caption">
@@ -147,7 +147,15 @@ export const Upload = () => {
                     accept="application/pdf"
                     onChange={(e) => {
                       if (!e.target.files?.[0]) return;
-                      generateProposalSummary(e.target.files[0]);
+                      const referenceFileIds = posts
+                        .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
+                        .filter((id) => id !== null) as string[];
+
+                      generateNewProposal({
+                        pdf: e.target.files[0],
+                        referenceFileIds,
+                        answerType: "descriptive",
+                      });
                     }}
                   />
                 </Button>

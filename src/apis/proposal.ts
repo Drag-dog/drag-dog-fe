@@ -33,7 +33,7 @@ const postGenerateProposalSummary = async ({
 }: {
   accessToken: string;
   pdf: File;
-}) => {
+}): Promise<ResPostGenerateProposalSummary> => {
   const formData = new FormData();
   formData.append("pdf", pdf);
 
@@ -65,7 +65,6 @@ const postAnswerProposal = async ({
     },
     { ...authorizationHeader(accessToken) }
   );
-
   return response.data;
 };
 
@@ -173,10 +172,19 @@ export const proposalApi = {
 
 export type PropsPostAnswerProposal = {
   accessToken: string;
-  contentsToInclude: string[];
-  characterLimit: number;
-  referenceFileIds: string[];
-  noteWhenWriting: string[];
-  question: string;
-  answerType: string;
+  contentsToInclude?: string[];
+  characterLimit?: string;
+  referenceFileIds?: string[];
+  noteWhenWriting?: string[];
+  question?: string;
+  answerType?: string;
+};
+
+export type ResPostGenerateProposalSummary = {
+  [key: number]: {
+    characterLimit?: string;
+    contentsToInclude?: string[];
+    noteWhenWriting?: string[];
+    question?: string;
+  };
 };

@@ -14,24 +14,21 @@ export const Success = () => {
       <PageLayout.Title />
       <PageLayout.SubTitle>
         <Typography variant="h1">사업계획서 작성 완료!</Typography>
+        <Typography variant="caption">
+          (새롭게 작성하기 전까지는 이 페이지에서 내용을 확인할 수 있습니다.)
+        </Typography>
       </PageLayout.SubTitle>
       <PageLayout.Body>
         {/* [Todo] 사업계획서처럼 꾸며주기 */}
         <div style={{ border: `1px solid ${appColor.grey2}`, padding: "4rem 2rem" }}>
-          <Typography variant="h4">1. {question}</Typography>
-          <Empty height="1rem" />
-          {resProposal.map(({ additional, answer }, index) => (
+          {question.map((q, idx) => (
             <>
-              <Typography key={index} variant="h5">
-                ■ {answer}
+              <Typography key={idx} variant="h4">
+                {idx + 1}. {q}
               </Typography>
-              <Empty height="1rem" />
-              {additional?.map((str, idx) => (
-                <>
-                  <Typography key={idx}>- {str}</Typography>
-                  <Empty height="0.5rem" />
-                </>
-              ))}
+              <Typography key={idx} variant="h5">
+                {`■ ${resProposal[idx]}`}
+              </Typography>
               <Empty height="2rem" />
             </>
           ))}

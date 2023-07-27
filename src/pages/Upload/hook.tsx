@@ -2,23 +2,20 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "react-query";
 import { useIsSignIn } from "../../hooks/useIsSignIn";
-import { PropsPostAnswerProposal, proposalApi } from "../../apis/proposal";
+import { ResPostGenerateProposalSummary, proposalApi } from "../../apis/proposal";
 import { useAtomValue, useSetAtom } from "jotai";
-import { accessTokenAtom, resProposalsAtom, questionAtom } from "../../store/atoms";
+import { accessTokenAtom, questionAtom, resProposalsAtom } from "../../store/atoms";
 import { useAlert } from "../../hooks/useAlert";
 import { useModal } from "../../hooks/useModal";
 import Typography from "@mui/material/Typography/Typography";
 import { Empty } from "../../components/atoms";
 import TextField from "@mui/material/TextField/TextField";
-import Button from "@mui/material/Button/Button";
-import RadioGroup from "@mui/material/RadioGroup/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
-import Radio from "@mui/material/Radio/Radio";
 import { AccordionList, Content } from "../../components/organisms/AccordionList";
 import { InputAdornment, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { isEmpty } from "../../lib/utils/isEmpty";
 import { LOGIN_STATE } from "../../constants/enum";
+import { List, ListItem, Checkbox, Button } from "@mui/material";
 
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
@@ -34,8 +31,8 @@ export const useUpload = () => {
   const setResProposal = useSetAtom(resProposalsAtom);
   const [contents, setContents] = React.useState<Content>({});
   const summaryModal = useModal();
-  const uploadModal = useModal();
   const contentsSearchModal = useModal();
+  const setSelectedSummary = useSetAtom(questionAtom);
 
   // [Todo] mutaion이 아닌 query로 변경 필요
   const mutGetFileInfoList = useMutation({
@@ -59,18 +56,6 @@ export const useUpload = () => {
     },
     onError: () => openAlert(),
   });
-
-  // const mutGenerateProposal = useMutation({
-  //   mutationFn: async ({ ...props }: Omit<PropsPostAnswerProposal, "accessToken">) => {
-  //     uploadModal.handleClose();
-  //     return await proposalApi.postAnswerProposal({ accessToken, ...props });
-  //   },
-  //   onSuccess: (res) => {
-  //     setResProposal(res);
-  //     navigate("/success");
-  //   },
-  //   onError: () => openAlert(),
-  // });
 
   const mutDeleteProposalSummary = useMutation({
     mutationFn: async (proposalKey: number) => {
@@ -117,11 +102,44 @@ export const useUpload = () => {
     onError: () => openAlert(),
   });
 
+  const [proposalSummary, setProposalSummary] = React.useState<ResPostGenerateProposalSummary>({});
+  const selectBoxModal = useModal();
+  const propsGenerateProposalSummary = React.useRef<{
+    referenceFileIds: string[];
+    answerType: string;
+  }>({ referenceFileIds: [""], answerType: "" });
   const mutPostGenerateProposalSummary = useMutation({
-    mutationFn: async (pdf: File) => {
-      const res = await proposalApi.postGenerateProposalSummary({ accessToken, pdf });
-      console.log(res);
+    mutationFn: async ({
+      pdf,
+      referenceFileIds,
+      answerType,
+    }: {
+      pdf: File;
+      referenceFileIds: string[];
+      answerType: string;
+    }) => {
+      const proposalSummary = await proposalApi.postGenerateProposalSummary({ accessToken, pdf });
+      setProposalSummary(proposalSummary);
+      propsGenerateProposalSummary.current = { referenceFileIds, answerType };
     },
+    onSuccess: () => selectBoxModal.handleOpen(),
+  });
+
+  const mutPostAnswerProposal = useMutation({
+    mutationFn: async () => {
+      await Promise.all(
+        Object.entries(proposalSummary).map(async ([key, props]) => {
+          const value = await proposalApi.postAnswerProposal({
+            accessToken,
+            referenceFileIds: propsGenerateProposalSummary.current.referenceFileIds,
+            answerType: propsGenerateProposalSummary.current.answerType,
+            ...props,
+          });
+          setResProposal((prev) => [...prev, value]);
+        })
+      );
+    },
+    onSuccess: () => navigate("/success"),
   });
 
   const [isSelectedProposalList, setIsSelectedProposalList] = React.useState<boolean[]>([]);
@@ -234,6 +252,95 @@ export const useUpload = () => {
     </successAlert.Alert>
   );
 
+  const SelectBoxModal = () => {
+    const [selected, setSelected] = React.useState<boolean[]>(
+      Object.entries(proposalSummary).map((x) => true)
+    );
+    return (
+      <selectBoxModal.Modal>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+          }}
+        >
+          <Typography variant="h4">항목을 선택해주세요.</Typography>
+          <Empty height="1rem" />
+          <Typography variant="caption">(선택하신 항목으로 사업계획서를 작성합니다.)</Typography>
+        </div>
+        <Empty height="1rem" />
+        <List sx={{ width: "100%" }}>
+          {Object.entries(proposalSummary).map(([key, props], idx) => (
+            <ListItem
+              key={key}
+              sx={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "space-between",
+                textDecoration: !selected[idx] ? "line-through" : "",
+                color: !selected[idx] ? "gray" : "",
+              }}
+            >
+              <Typography
+                sx={{
+                  maxWidth: "70%",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  textAlign: "baseline",
+                }}
+              >
+                {`${idx + 1}. ${props.question}`}
+              </Typography>
+              <Checkbox
+                checked={selected[idx]}
+                onChange={(e) =>
+                  setSelected((prev) => {
+                    const temp = [...prev];
+                    temp[idx] = e.target.checked;
+                    return temp;
+                  })
+                }
+              />
+            </ListItem>
+          ))}
+        </List>
+        <Empty height="1rem" />
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Button
+            variant="contained"
+            component="label"
+            sx={{
+              width: "30%",
+              height: "4rem",
+              display: "flex",
+              flexDirection: "column",
+            }}
+            onClick={(e) => {
+              const selectedSummary = Object.entries(proposalSummary).filter(
+                (_, idx) => selected[idx]
+              );
+              setProposalSummary(Object.fromEntries(selectedSummary));
+              setSelectedSummary(selectedSummary.map((x) => x[1].question!));
+              mutPostAnswerProposal.mutate();
+              selectBoxModal.handleClose();
+            }}
+          >
+            <Typography>AI 사업 계획서 만들기</Typography>
+          </Button>
+        </div>
+      </selectBoxModal.Modal>
+    );
+  };
+
   React.useLayoutEffect(() => {
     // [Error] 토큰이 있는데 로그인 페이지로 이동하는 문제
     if (loginState === LOGIN_STATE.NOT_LOGGED_IN) {
@@ -251,15 +358,16 @@ export const useUpload = () => {
     onCheck,
     postSummarizePdf: mutSummaizePdf.mutate,
     getPropsalSummary: mutGetPropsalSummary.mutate,
-    generateProposalSummary: mutPostGenerateProposalSummary.mutate,
-    generateProposalSummaryLoading: mutPostGenerateProposalSummary.isLoading,
+    generateNewProposal: mutPostGenerateProposalSummary.mutate,
+    generateProposalSummaryLoading:
+      mutPostGenerateProposalSummary.isLoading || mutPostAnswerProposal.isLoading,
     onDelete,
     isSummaryLoading: mutSummaizePdf.isLoading,
     Alert,
     SuccessAlert,
     SummaryModal,
-    openUploadModal: uploadModal.handleOpen,
     openContentsSearchModal: contentsSearchModal.handleOpen,
     ContentsSearchModal,
+    SelectBoxModal,
   };
 };

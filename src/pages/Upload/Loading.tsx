@@ -8,7 +8,7 @@ export const LoadingComponent = () => {
   return (
     <>
       <Typography>사업 계획서를 작성하는 중입니다</Typography>
-      <Typography>잠시만 기다려주세요!</Typography>
+      <Typography>잠시만 기다려주세요! (5분 가량 소모)</Typography>
       <Empty height="2rem" />
       <img
         src={LoadingCup}
