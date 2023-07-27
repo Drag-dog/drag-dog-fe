@@ -18,6 +18,7 @@ import { AccordionList, Content } from "../../components/organisms/AccordionList
 import { InputAdornment, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import { isEmpty } from "../../lib/utils/isEmpty";
+import {LOGIN_STATE} from "../../constants/enum";
 
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
@@ -25,7 +26,7 @@ export const useUpload = () => {
   const navigate = useNavigate();
   const { openAlert, Alert } = useAlert();
   const [posts, setPosts] = React.useState<{ id: number; name: string }[]>([]);
-  const { isSignIn } = useIsSignIn();
+  const { loginState } = useIsSignIn();
   const [summary, setSummary] = React.useState<{ [key: string]: string[] }>({});
   const setResProposal = useSetAtom(resProposalsAtom);
   const [contents, setContents] = React.useState<Content>({});
@@ -318,15 +319,14 @@ export const useUpload = () => {
 
   React.useLayoutEffect(() => {
     // [Error] 토큰이 있는데 로그인 페이지로 이동하는 문제
-    if (!isSignIn) {
-      console.log("hihihi");
+    if(loginState===LOGIN_STATE.NOT_LOGGED_IN){
       navigate("/sign-in");
-    } else {
-      console.log("hihoho");
+    } else if(loginState===LOGIN_STATE.LOGGED_IN){
       mutGetFileInfoList.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSignIn]);
+  }, [loginState])
+
 
   // [Todo] 리팩터링 필요
   return {
