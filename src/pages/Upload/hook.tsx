@@ -7,7 +7,6 @@ import { useAtomValue, useSetAtom } from "jotai";
 import { accessTokenAtom, resProposalsAtom, questionAtom } from "../../store/atoms";
 import { useAlert } from "../../hooks/useAlert";
 import { useModal } from "../../hooks/useModal";
-import ListItem from "@mui/material/ListItem/ListItem";
 import Typography from "@mui/material/Typography/Typography";
 import { Empty } from "../../components/atoms";
 import TextField from "@mui/material/TextField/TextField";
@@ -15,7 +14,6 @@ import Button from "@mui/material/Button/Button";
 import RadioGroup from "@mui/material/RadioGroup/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel/FormControlLabel";
 import Radio from "@mui/material/Radio/Radio";
-import Stack from "@mui/material/Stack/Stack";
 import { AccordionList, Content } from "../../components/organisms/AccordionList";
 import { InputAdornment, IconButton } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
@@ -28,14 +26,14 @@ export const useUpload = () => {
   const { openAlert, Alert } = useAlert();
   const [posts, setPosts] = React.useState<{ id: number; name: string }[]>([]);
   const { isSignIn } = useIsSignIn();
-  const [summary, setSummary] = React.useState<{ [key: string]: string }>({});
+  const [summary, setSummary] = React.useState<{ [key: string]: string[] }>({});
   const setResProposal = useSetAtom(resProposalsAtom);
   const [contents, setContents] = React.useState<Content>({});
   const summaryModal = useModal();
   const uploadModal = useModal();
   const contentsSearchModal = useModal();
 
-  // [Todo] mutaion이 아닌 query로 변경
+  // [Todo] mutaion이 아닌 query로 변경 필요
   const mutGetFileInfoList = useMutation({
     mutationFn: async () => {
       return await proposalApi.getProposalInfoList({ accessToken });
@@ -99,6 +97,24 @@ export const useUpload = () => {
     onError: () => openAlert(),
   });
 
+  const mutPutProposals = useMutation({
+    mutationFn: async ({
+      summaryId,
+      summaries,
+    }: {
+      summaryId: number;
+      summaries: { [key: string]: string };
+    }) => {
+      return await proposalApi.putProposalSummary({
+        accessToken,
+        summaryId,
+        summaries,
+      });
+    },
+    onSuccess: () => {},
+    onError: () => openAlert(),
+  });
+
   const [isSelectedProposalList, setIsSelectedProposalList] = React.useState<boolean[]>([]);
 
   const onCheck = ({ index, checked }: { index: number; checked: boolean }) => {
@@ -110,6 +126,7 @@ export const useUpload = () => {
   };
 
   const SummaryModal = () => {
+    const [_summary, _setSummary] = React.useState<{ [key: string]: string[] }>(summary);
     return (
       <summaryModal.Modal>
         <div
@@ -120,29 +137,19 @@ export const useUpload = () => {
             alignItems: "center",
           }}
         >
-          {/* [Todo] 여기도 Accordion으로 바꿀까? */}
           <Typography variant="h4">요약된 사업계획서</Typography>
           <Empty height="0.5rem" />
           <Typography variant="caption">(요약된 사업계획서의 내용도 수정가능합니다)</Typography>
         </div>
         <Empty height="1rem" />
-        {Object.entries(summary).map(([key, value], idx) => (
-          <>
-            <ListItem key={key} sx={{ flexDirection: "column" }}>
-              <Stack direction="column" spacing={2} sx={{ width: "100%" }}>
-                <Typography variant="h5">{`${idx + 1}.  ${key}`}</Typography>
-                <TextField multiline rows={4} defaultValue={value} sx={{ width: "100%" }} />
-              </Stack>
-            </ListItem>
-            <Empty height="1rem" />
-          </>
-        ))}
+        {!isEmpty(_summary) ? (
+          <AccordionList contentList={_summary} setContents={_setSummary} />
+        ) : (
+          <div style={{ width: "100%", textAlign: "center" }}>
+            <Typography>검색 결과가 없습니다.</Typography>
+          </div>
+        )}
         <Empty height="1rem" />
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Button variant="contained" sx={{ width: "50%", height: "4rem" }}>
-            수정하기
-          </Button>
-        </div>
       </summaryModal.Modal>
     );
   };
@@ -310,15 +317,16 @@ export const useUpload = () => {
   };
 
   React.useLayoutEffect(() => {
-    mutGetFileInfoList.mutate();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  React.useLayoutEffect(() => {
     // [Error] 토큰이 있는데 로그인 페이지로 이동하는 문제
-    if (!isSignIn) navigate("/sign-in");
+    if (!isSignIn) {
+      console.log("hihihi");
+      navigate("/sign-in");
+    } else {
+      console.log("hihoho");
+      mutGetFileInfoList.mutate();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isSignIn]);
 
   // [Todo] 리팩터링 필요
   return {

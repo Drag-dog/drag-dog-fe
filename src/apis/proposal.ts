@@ -6,7 +6,7 @@ const proposalInstance = axios.create({
   baseURL: ENV.BASE_URL,
 });
 
-const authorizationHeader = (accessToken: string): AxiosRequestConfig => {
+export const authorizationHeader = (accessToken: string): AxiosRequestConfig => {
   return {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -63,9 +63,7 @@ const postAnswerProposal = async ({
       question,
       answerType,
     },
-    {
-      ...authorizationHeader(accessToken),
-    }
+    { ...authorizationHeader(accessToken) }
   );
 
   return response.data;
@@ -137,6 +135,24 @@ const getPropsalSummary = async ({
   return response.data;
 };
 
+const putProposalSummary = async ({
+  accessToken,
+  summaryId,
+  summaries,
+}: {
+  accessToken: string;
+  summaryId: number;
+  summaries: object;
+}) => {
+  const response = await proposalInstance.put(
+    `${ROUTE}/proposals/${summaryId}`,
+    { summaries },
+    { ...authorizationHeader(accessToken) }
+  );
+
+  return response.data;
+};
+
 export const proposalApi = {
   getProposalKeyList,
   postSummarizePdf,
@@ -145,6 +161,7 @@ export const proposalApi = {
   deleteProposalSummary,
   postAnswerProposal,
   getSearchContents,
+  putProposalSummary,
 };
 
 export type PropsPostAnswerProposal = {

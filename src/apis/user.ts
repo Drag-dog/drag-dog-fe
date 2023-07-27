@@ -1,5 +1,6 @@
 import axios from "axios";
 import { ENV } from "../constants/env";
+import { authorizationHeader } from "./proposal";
 
 const ROUTE = "api/users";
 const authInstance = axios.create({
@@ -24,9 +25,18 @@ const signUp = async ({ email, password }: PropsSign) => {
   return response.data;
 };
 
+const getIsSignIn = async (accessToken: string) => {
+  const response = await authInstance.get(`${ROUTE}/check-user-logged-in`, {
+    ...authorizationHeader(accessToken),
+  });
+
+  return response.data;
+};
+
 export const userApi = {
   signIn,
   signUp,
+  getIsSignIn,
 };
 
 export type PropsSign = {
