@@ -135,18 +135,19 @@ const getPropsalSummary = async ({
   return response.data;
 };
 
+// [Error] 이슈있음
 const putProposalSummary = async ({
   accessToken,
   summaryId,
   summaries,
 }: {
   accessToken: string;
-  summaryId: number;
+  summaryId: string;
   summaries: object;
 }) => {
   const response = await proposalInstance.put(
     `${ROUTE}/proposals/${summaryId}`,
-    { summaries },
+    { summaryId, summaries },
     { ...authorizationHeader(accessToken) }
   );
 

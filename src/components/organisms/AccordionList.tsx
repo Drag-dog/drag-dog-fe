@@ -38,7 +38,12 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
 const AccordionTextField = styled(TextField)(({ theme }) => ({ width: "100%" }));
 const AccordionTypography = styled(Typography)(({ theme }) => ({ width: "100%", margin: "1rem" }));
 
-export const AccordionList = ({ contentList, setContents, update }: PropsAccordionList) => {
+export const AccordionList = ({
+  contentList,
+  setContents,
+  update,
+  summaryId,
+}: PropsAccordionList) => {
   const [expanded, setExpanded] = React.useState<number>(-1);
   const [isEditMode, setIsEditMode] = React.useState<boolean>(false);
   const [_contents, _setContents] = React.useState<Content>(contentList);
@@ -94,10 +99,7 @@ export const AccordionList = ({ contentList, setContents, update }: PropsAccordi
                         e.stopPropagation();
                         setContents?.((prev) => ({ ...prev, [title]: _contents.title }));
                         setIsEditMode(false);
-                        update?.({
-                          summaryId: 1,
-                          summaries: content,
-                        });
+                        update?.({ summaryId: summaryId!, summaries: content });
                       }}
                     >
                       <Typography variant="caption">추가하기</Typography>
@@ -129,7 +131,8 @@ export const AccordionList = ({ contentList, setContents, update }: PropsAccordi
 type PropsAccordionList = {
   contentList: Content;
   setContents?: React.Dispatch<React.SetStateAction<Content>>;
-  update?: UseMutateFunction<any, unknown, { summaryId: number; summaries: object }, unknown>;
+  update?: UseMutateFunction<any, unknown, { summaryId: string; summaries: object }, unknown>;
+  summaryId?: string;
 };
 
 export type Content = { [key: string]: string[] };

@@ -29,6 +29,7 @@ export const useUpload = () => {
   const [posts, setPosts] = React.useState<{ id: number; name: string }[]>([]);
   const { isSignIn } = useIsSignIn();
   const [summary, setSummary] = React.useState<{ [key: string]: string[] }>({});
+  const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
   const [contents, setContents] = React.useState<Content>({});
   const summaryModal = useModal();
@@ -80,6 +81,7 @@ export const useUpload = () => {
 
   const mutGetPropsalSummary = useMutation({
     mutationFn: async (proposalKey: number) => {
+      setOpenedSummaryId(String(proposalKey));
       return await proposalApi.getPropsalSummary({ accessToken, proposalKey });
     },
     onSuccess: (res) => {
@@ -100,7 +102,7 @@ export const useUpload = () => {
   });
 
   const mutPutProposals = useMutation({
-    mutationFn: async ({ summaryId, summaries }: { summaryId: number; summaries: object }) => {
+    mutationFn: async ({ summaryId, summaries }: { summaryId: string; summaries: object }) => {
       return await proposalApi.putProposalSummary({
         accessToken,
         summaryId,
@@ -143,6 +145,7 @@ export const useUpload = () => {
             contentList={_summary}
             setContents={_setSummary}
             update={mutPutProposals.mutate}
+            summaryId={openedSummaryId}
           />
         ) : (
           <div style={{ width: "100%", textAlign: "center" }}>
