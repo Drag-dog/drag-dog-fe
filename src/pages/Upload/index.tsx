@@ -16,12 +16,12 @@ export const Upload = () => {
     postSummarizePdf,
     onDelete,
     isSummaryLoading,
-    isGenerateLoading,
     getPropsalSummary,
     Alert,
     SummaryModal,
+    generateProposalSummary,
+    generateProposalSummaryLoading,
     openUploadModal,
-    UploadModal,
     openContentsSearchModal,
     ContentsSearchModal,
     SuccessAlert,
@@ -40,12 +40,11 @@ export const Upload = () => {
         {isSummaryLoading && <Loading />}
         <Alert>오류가 발생했습니다.</Alert>
         <SummaryModal />
-        <UploadModal />
         <ContentsSearchModal />
         <SuccessAlert />
       </PageLayout.Absolute>
       <PageLayout.Body>
-        {isGenerateLoading ? (
+        {generateProposalSummaryLoading ? (
           <LoadingComponent />
         ) : (
           <>
@@ -142,6 +141,15 @@ export const Upload = () => {
                   <Typography variant="caption">
                     (새 양식에 맞게 사업 계획서를 작성합니다.)
                   </Typography>
+                  <input
+                    style={{ display: "none" }}
+                    type="file"
+                    accept="application/pdf"
+                    onChange={(e) => {
+                      if (!e.target.files?.[0]) return;
+                      generateProposalSummary(e.target.files[0]);
+                    }}
+                  />
                 </Button>
               </div>
             </div>

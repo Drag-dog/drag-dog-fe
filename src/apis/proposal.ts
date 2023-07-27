@@ -24,22 +24,22 @@ const pdfHeader = (accessToken: string): AxiosRequestConfig => {
 };
 
 /**
- * @deprecated
+ * @description 빈 사업계획서에서 사업계획서 요약본을 생성
+ * 요약본 생성 후, for문을 돌려 새로운 사업계획서 작성 api를 호출할 것임
  */
-const postGenerateProposal = async ({
+const postGenerateProposalSummary = async ({
   accessToken,
-  referenceFileIds,
   pdf,
 }: {
   accessToken: string;
-  referenceFileIds: number[];
   pdf: File;
 }) => {
   const formData = new FormData();
   formData.append("pdf", pdf);
-  formData.append("referenceFileIds", JSON.stringify(referenceFileIds));
 
-  const response = await proposalInstance.post(`${ROUTE}`, formData, { ...pdfHeader(accessToken) });
+  const response = await proposalInstance.post(`${ROUTE}/summarize/empty`, formData, {
+    ...pdfHeader(accessToken),
+  });
 
   return response.data;
 };
@@ -69,6 +69,9 @@ const postAnswerProposal = async ({
   return response.data;
 };
 
+/**
+ * @description 사업계획서 키 리스트를 가져옴
+ */
 const getProposalKeyList = async ({ accessToken }: { accessToken: string }) => {
   const response = await proposalInstance.get(`${ROUTE}/keys`, {
     ...authorizationHeader(accessToken),
@@ -77,6 +80,9 @@ const getProposalKeyList = async ({ accessToken }: { accessToken: string }) => {
   return response.data;
 };
 
+/**
+ * @description 이미 요약된 사업계획서 정보들을 검색
+ */
 const getSearchContents = async ({
   accessToken,
   query,
@@ -135,7 +141,6 @@ const getPropsalSummary = async ({
   return response.data;
 };
 
-// [Error] 이슈있음
 const putProposalSummary = async ({
   accessToken,
   summaryId,
@@ -147,7 +152,7 @@ const putProposalSummary = async ({
 }) => {
   const response = await proposalInstance.put(
     `${ROUTE}/proposals/${summaryId}`,
-    { summaryId, summaries },
+    { summaries },
     { ...authorizationHeader(accessToken) }
   );
 
@@ -163,6 +168,7 @@ export const proposalApi = {
   postAnswerProposal,
   getSearchContents,
   putProposalSummary,
+  postGenerateProposalSummary,
 };
 
 export type PropsPostAnswerProposal = {
