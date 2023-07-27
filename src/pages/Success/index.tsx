@@ -9,6 +9,7 @@ import { appColor } from "../../constants/appColor";
 export const Success = () => {
   const resProposal = useAtomValue(resProposalsAtom);
   const question = useAtomValue(questionAtom);
+
   return (
     <PageLayout>
       <PageLayout.Title />
@@ -20,19 +21,32 @@ export const Success = () => {
       </PageLayout.SubTitle>
       <PageLayout.Body>
         {/* [Todo] 사업계획서처럼 꾸며주기 */}
-        <div style={{ border: `1px solid ${appColor.grey2}`, padding: "4rem 2rem" }}>
-          {question.map((q, idx) => (
-            <>
-              <Typography key={idx} variant="h4">
-                {idx + 1}. {q}
-              </Typography>
-              <Typography key={idx} variant="h5">
-                {`■ ${resProposal[idx]}`}
-              </Typography>
-              <Empty height="2rem" />
-            </>
-          ))}
-        </div>
+        {resProposal.length === 0 || question.length === 0 ? (
+          <Typography variant="h4">잠시만 기다려주세요!</Typography>
+        ) : (
+          <div style={{ border: `1px solid ${appColor.grey2}`, padding: "4rem 2rem" }}>
+            {question.map((q, idx) => (
+              <>
+                <Typography key={idx} variant="h4">
+                  {idx + 1}. {q}
+                </Typography>
+                <Empty height="1rem" />
+                <div style={{ padding: "1rem 1rem" }}>
+                  {resProposal[idx]
+                    .replace(/\n\n/g, "\n")
+                    .split("\n")
+                    .map((line) => (
+                      <>
+                        <Typography key={idx}>- {line}</Typography>
+                        <Empty height="1rem" />
+                      </>
+                    ))}
+                </div>
+                <Empty height="2rem" />
+              </>
+            ))}
+          </div>
+        )}
       </PageLayout.Body>
     </PageLayout>
   );
