@@ -24,6 +24,7 @@ export const Upload = () => {
     UploadModal,
     openContentsSearchModal,
     ContentsSearchModal,
+    SuccessAlert,
   } = useUpload();
   const { Loading } = useLoading();
 
@@ -41,6 +42,7 @@ export const Upload = () => {
         <SummaryModal />
         <UploadModal />
         <ContentsSearchModal />
+        <SuccessAlert />
       </PageLayout.Absolute>
       <PageLayout.Body>
         {isGenerateLoading ? (

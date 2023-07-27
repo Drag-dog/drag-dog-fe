@@ -8,6 +8,7 @@ import TextField from "@mui/material/TextField";
 import ModeIcon from "@mui/icons-material/Mode";
 import Button from "@mui/material/Button";
 import ReplyIcon from "@mui/icons-material/Reply";
+import { UseMutateFunction } from "react-query";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -37,9 +38,10 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
 const AccordionTextField = styled(TextField)(({ theme }) => ({ width: "100%" }));
 const AccordionTypography = styled(Typography)(({ theme }) => ({ width: "100%", margin: "1rem" }));
 
-export const AccordionList = ({ contentList, setContents }: PropsAccordionList) => {
+export const AccordionList = ({ contentList, setContents, update }: PropsAccordionList) => {
   const [expanded, setExpanded] = React.useState<number>(-1);
   const [isEditMode, setIsEditMode] = React.useState<boolean>(false);
+  const [_contents, _setContents] = React.useState<Content>(contentList);
 
   const handleChange =
     (panelIdx: number) => (event: React.SyntheticEvent, newExpanded: boolean) => {
@@ -49,7 +51,7 @@ export const AccordionList = ({ contentList, setContents }: PropsAccordionList) 
 
   return (
     <>
-      {Object.entries(contentList).map((section, idx) => {
+      {Object.entries(_contents).map((section, idx) => {
         const [title, content] = section;
         return (
           <Accordion expanded={expanded === idx} onChange={handleChange(idx)}>
@@ -63,45 +65,60 @@ export const AccordionList = ({ contentList, setContents }: PropsAccordionList) 
                 }}
               >
                 <Typography>{`${idx + 1}. ${title}`}</Typography>
-                {expanded === idx && (
-                  <Button
-                    color={isEditMode ? "primary" : "inherit"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsEditMode((prev) => !prev);
-                    }}
-                  >
-                    {isEditMode ? (
-                      <>
-                        <Typography variant="caption">취소하기</Typography>
-                        <ReplyIcon />
-                      </>
-                    ) : (
-                      <>
-                        <Typography variant="caption">수정하기</Typography>
-                        <ModeIcon />
-                      </>
-                    )}
-                  </Button>
-                )}
+                <div>
+                  {setContents && expanded === idx && (
+                    <Button
+                      color={isEditMode ? "primary" : "inherit"}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditMode((prev) => !prev);
+                      }}
+                    >
+                      {isEditMode ? (
+                        <>
+                          <Typography variant="caption">취소하기</Typography>
+                          <ReplyIcon />
+                        </>
+                      ) : (
+                        <>
+                          <Typography variant="caption">수정하기</Typography>
+                          <ModeIcon />
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  {setContents && expanded === idx && isEditMode && (
+                    <Button
+                      color="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setContents?.((prev) => ({ ...prev, [title]: _contents.title }));
+                        setIsEditMode(false);
+                        update?.({
+                          summaryId: 1,
+                          summaries: content,
+                        });
+                      }}
+                    >
+                      <Typography variant="caption">추가하기</Typography>
+                      <ModeIcon />
+                    </Button>
+                  )}
+                </div>
               </div>
             </AccordionSummary>
-            {isEditMode
-              ? content.map((c, i) => (
-                  <AccordionTextField
-                    key={i}
-                    defaultValue={c}
-                    // [Todo] onChange가 아니라 다른 클릭으로 바꾸기
-                    onChange={(e) => {
-                      setContents?.((prev) => ({
-                        ...prev,
-                        // [Todo] 잘 작동하는 지 확인하기
-                        [title]: [...prev[title], e.target.value],
-                      }));
-                    }}
-                  />
-                ))
-              : content.map((c, i) => <AccordionTypography>{`- ${c}`}</AccordionTypography>)}
+            {isEditMode ? (
+              <AccordionTextField
+                defaultValue={content.join("\n")}
+                multiline
+                rows={3}
+                onChange={(e) => {
+                  _setContents((prev) => ({ ...prev, [title]: e.target.value.split("\n") }));
+                }}
+              />
+            ) : (
+              content.map((c) => <AccordionTypography>{`- ${c}`}</AccordionTypography>)
+            )}
           </Accordion>
         );
       })}
@@ -111,7 +128,8 @@ export const AccordionList = ({ contentList, setContents }: PropsAccordionList) 
 
 type PropsAccordionList = {
   contentList: Content;
-  setContents?: React.Dispatch<React.SetStateAction<{ [key: string]: string[] }>>;
+  setContents?: React.Dispatch<React.SetStateAction<Content>>;
+  update?: UseMutateFunction<any, unknown, { summaryId: number; summaries: object }, unknown>;
 };
 
 export type Content = { [key: string]: string[] };

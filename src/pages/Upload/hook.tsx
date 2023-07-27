@@ -23,7 +23,9 @@ import { isEmpty } from "../../lib/utils/isEmpty";
 export const useUpload = () => {
   const accessToken = useAtomValue(accessTokenAtom);
   const navigate = useNavigate();
+  // [Todo] Alert 수정 필요
   const { openAlert, Alert } = useAlert();
+  const successAlert = useAlert();
   const [posts, setPosts] = React.useState<{ id: number; name: string }[]>([]);
   const { isSignIn } = useIsSignIn();
   const [summary, setSummary] = React.useState<{ [key: string]: string[] }>({});
@@ -98,20 +100,14 @@ export const useUpload = () => {
   });
 
   const mutPutProposals = useMutation({
-    mutationFn: async ({
-      summaryId,
-      summaries,
-    }: {
-      summaryId: number;
-      summaries: { [key: string]: string };
-    }) => {
+    mutationFn: async ({ summaryId, summaries }: { summaryId: number; summaries: object }) => {
       return await proposalApi.putProposalSummary({
         accessToken,
         summaryId,
         summaries,
       });
     },
-    onSuccess: () => {},
+    onSuccess: () => successAlert.openAlert(),
     onError: () => openAlert(),
   });
 
@@ -139,11 +135,15 @@ export const useUpload = () => {
         >
           <Typography variant="h4">요약된 사업계획서</Typography>
           <Empty height="0.5rem" />
-          <Typography variant="caption">(요약된 사업계획서의 내용도 수정가능합니다)</Typography>
+          <Typography variant="caption">(사업계획서의 내용도 수정가능합니다. )</Typography>
         </div>
         <Empty height="1rem" />
         {!isEmpty(_summary) ? (
-          <AccordionList contentList={_summary} setContents={_setSummary} />
+          <AccordionList
+            contentList={_summary}
+            setContents={_setSummary}
+            update={mutPutProposals.mutate}
+          />
         ) : (
           <div style={{ width: "100%", textAlign: "center" }}>
             <Typography>검색 결과가 없습니다.</Typography>
@@ -316,17 +316,21 @@ export const useUpload = () => {
     mutDeleteProposalSummary.mutate(proposalId);
   };
 
+  const SuccessAlert = () => (
+    <successAlert.Alert severity="success">
+      <Typography>요약된 사업계획서가 수정되었습니다.</Typography>
+    </successAlert.Alert>
+  );
+
   React.useLayoutEffect(() => {
     // [Error] 토큰이 있는데 로그인 페이지로 이동하는 문제
     if (!isSignIn) {
-      console.log("hihihi");
       navigate("/sign-in");
     } else {
-      console.log("hihoho");
       mutGetFileInfoList.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isSignIn]);
+  }, []);
 
   // [Todo] 리팩터링 필요
   return {
@@ -339,6 +343,7 @@ export const useUpload = () => {
     isSummaryLoading: mutSummaizePdf.isLoading,
     isGenerateLoading: mutGenerateProposal.isLoading,
     Alert,
+    SuccessAlert,
     SummaryModal,
     openUploadModal: uploadModal.handleOpen,
     UploadModal,
