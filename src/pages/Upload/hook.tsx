@@ -16,6 +16,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { isEmpty } from "../../lib/utils/isEmpty";
 import { LOGIN_STATE } from "../../constants/enum";
 import { List, ListItem, Checkbox, Button } from "@mui/material";
+import BusinessItemBox from "./EmptyProposalBox";
 
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
@@ -292,7 +293,9 @@ export const useUpload = () => {
                   textAlign: "baseline",
                 }}
               >
-                {`${idx + 1}. ${props.question}`}
+                <BusinessItemBox initialData={props} />
+
+                {/*{`${idx + 1}. ${props.question}`}*/}
               </Typography>
               <Checkbox
                 checked={selected[idx]}
