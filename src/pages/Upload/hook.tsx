@@ -197,9 +197,9 @@ export const useUpload = () => {
       {},
       ...Object.entries(proposalSummary).map(([_, props]) => {
         const res = [];
-        !!props.characterLimit && res.push(`글자수 제한 : ${props.characterLimit}`);
         !!props.noteWhenWriting && res.push(`작성시 주의사항 : ${props.noteWhenWriting}`);
         !!props.contentsToInclude && res.push(`포함되어야 하는 내용 : ${props.contentsToInclude}`);
+        !!props.characterLimit && res.push(`글자수 제한 : ${props.characterLimit}`);
 
         return {
           [props.question as string]: res.length === 0 ? ["조건이 없습니다."] : [...res],
