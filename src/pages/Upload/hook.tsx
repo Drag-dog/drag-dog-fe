@@ -16,16 +16,7 @@ import { Empty } from "../../components/atoms";
 import { AccordionList } from "../../components/organisms/AccordionList";
 import { isEmpty } from "../../lib/utils/isEmpty";
 import { LOGIN_STATE } from "../../constants/enum";
-import {
-  List,
-  ListItem,
-  Checkbox,
-  Button,
-  TextField,
-  RadioGroup,
-  Radio,
-  FormControlLabel,
-} from "@mui/material";
+import { Button, TextField, RadioGroup, Radio, FormControlLabel } from "@mui/material";
 
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
@@ -212,13 +203,16 @@ export const useUpload = () => {
 
     const proposalSummaryContentList = Object.assign(
       {},
-      ...Object.entries(proposalSummary).map(([_, props]) => ({
-        [props.question as string]: [
-          `글자수 제한 : ${props.characterLimit}`,
-          `작성시 주의사항 : ${props.noteWhenWriting}`,
-          `포함되어야 하는 내용 : ${props.contentsToInclude}`,
-        ],
-      }))
+      ...Object.entries(proposalSummary).map(([_, props]) => {
+        const res = [];
+        !!props.characterLimit && res.push(`글자수 제한 : ${props.characterLimit}`);
+        !!props.noteWhenWriting && res.push(`작성시 주의사항 : ${props.noteWhenWriting}`);
+        !!props.contentsToInclude && res.push(`포함되어야 하는 내용 : ${props.contentsToInclude}`);
+
+        return {
+          [props.question as string]: res.length === 0 ? ["조건이 없습니다."] : [...res],
+        };
+      })
     );
     return (
       <selectBoxModal.Modal>
