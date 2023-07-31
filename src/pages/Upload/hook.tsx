@@ -9,10 +9,7 @@ import { useAlert } from "../../hooks/useAlert";
 import { useModal } from "../../hooks/useModal";
 import Typography from "@mui/material/Typography/Typography";
 import { Empty } from "../../components/atoms";
-import TextField from "@mui/material/TextField/TextField";
-import { AccordionList, Content } from "../../components/organisms/AccordionList";
-import { InputAdornment, IconButton } from "@mui/material";
-import SearchIcon from "@mui/icons-material/Search";
+import { AccordionList } from "../../components/organisms/AccordionList";
 import { isEmpty } from "../../lib/utils/isEmpty";
 import { LOGIN_STATE } from "../../constants/enum";
 import { List, ListItem, Checkbox, Button } from "@mui/material";
@@ -29,9 +26,7 @@ export const useUpload = () => {
   const [summary, setSummary] = React.useState<{ [key: string]: string[] }>({});
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
-  const [contents, setContents] = React.useState<Content>({});
   const summaryModal = useModal();
-  const contentsSearchModal = useModal();
   const setSelectedSummary = useSetAtom(questionAtom);
 
   // [Todo] mutaion이 아닌 query로 변경 필요
@@ -74,17 +69,6 @@ export const useUpload = () => {
       setSummary(res.data);
       summaryModal.handleOpen();
     },
-  });
-
-  const mutSearchContents = useMutation({
-    mutationFn: async (query: string) => {
-      return await proposalApi.getSearchContents({ accessToken, query });
-    },
-    onSuccess: (res) => {
-      setContents(res.data);
-      contentsSearchModal.handleOpen();
-    },
-    onError: () => openAlert(),
   });
 
   const mutPutProposals = useMutation({
@@ -183,62 +167,6 @@ export const useUpload = () => {
         )}
         <Empty height="1rem" />
       </summaryModal.Modal>
-    );
-  };
-
-  const ContentsSearchModal = () => {
-    const [query, setQuery] = React.useState<string>("");
-    return (
-      <contentsSearchModal.Modal>
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
-          }}
-        >
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            <Typography variant="h5">기존 항목 검색</Typography>
-          </div>
-          <Empty height="1rem" />
-          <div style={{ display: "flex", alignItems: "baseline" }}>
-            <Typography>사업 계획서의 문항을 입력해주세요.</Typography>
-            <Typography variant="caption">
-              (학습된 기존 사업 계획서를 새로 생성없이 빠르게 확인 가능합니다.)
-            </Typography>
-          </div>
-          <TextField
-            placeholder="ex) 사업 개요"
-            onChange={(e) => {
-              setQuery(e.target.value);
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") mutSearchContents.mutate(query);
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    onClick={(e) => {
-                      mutSearchContents.mutate(query);
-                    }}
-                  >
-                    <SearchIcon />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Empty height="2rem" />
-          {!isEmpty(contents) ? (
-            <AccordionList contentList={contents} />
-          ) : (
-            <div style={{ width: "100%", textAlign: "center" }}>
-              <Typography>검색 결과가 없습니다.</Typography>
-            </div>
-          )}
-        </div>
-      </contentsSearchModal.Modal>
     );
   };
 
@@ -366,8 +294,6 @@ export const useUpload = () => {
     Alert,
     SuccessAlert,
     SummaryModal,
-    openContentsSearchModal: contentsSearchModal.handleOpen,
-    ContentsSearchModal,
     SelectBoxModal,
   };
 };

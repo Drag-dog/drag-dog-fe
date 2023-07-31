@@ -25,9 +25,8 @@ export const ProposalList = ({
             sx={{
               width: "100%",
               borderBottom: `1px solid ${appColor.lightBlue1}`,
-              backgroundColor: `${isSelectedProposalList[i] ? appColor.lightBlue1 : ""}`,
               "&:hover": {
-                backgroundColor: `${appColor.lightBlue1}`,
+                color: `${appColor.lightBlue1}`,
                 cursor: "default",
               },
             }}
@@ -51,6 +50,7 @@ export const ProposalList = ({
                     cursor: "pointer",
                   },
                 }}
+                color={isSelectedProposalList[i] ? "primary" : "GrayText"}
                 onClick={(e) => {
                   e.stopPropagation();
                   onClick(post.id);

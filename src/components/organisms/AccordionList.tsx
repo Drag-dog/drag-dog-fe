@@ -9,8 +9,6 @@ import ModeIcon from "@mui/icons-material/Mode";
 import Button from "@mui/material/Button";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { UseMutateFunction } from "react-query";
-import { useAtomValue } from "jotai";
-import { accessTokenAtom } from "../../store/atoms";
 
 const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />

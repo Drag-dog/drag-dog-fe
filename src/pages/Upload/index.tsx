@@ -21,8 +21,6 @@ export const Upload = () => {
     SummaryModal,
     generateNewProposal,
     generateProposalSummaryLoading,
-    openContentsSearchModal,
-    ContentsSearchModal,
     SuccessAlert,
     SelectBoxModal,
   } = useUpload();
@@ -40,7 +38,6 @@ export const Upload = () => {
         {isSummaryLoading && <Loading />}
         <Alert>오류가 발생했습니다.</Alert>
         <SummaryModal />
-        <ContentsSearchModal />
         <SuccessAlert />
         <SelectBoxModal />
       </PageLayout.Absolute>
@@ -110,22 +107,6 @@ export const Upload = () => {
                   width: "50%",
                 }}
               >
-                <Button
-                  variant="contained"
-                  component="label"
-                  sx={{
-                    width: "50%",
-                    height: "4rem",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                  onClick={() => openContentsSearchModal()}
-                >
-                  <Typography>기존 항목 검색</Typography>
-                  <Typography variant="caption">
-                    (기존 내용을 바탕으로 빠르게 검색합니다.)
-                  </Typography>
-                </Button>
                 <Empty width="1rem" />
                 <Button
                   variant="contained"
