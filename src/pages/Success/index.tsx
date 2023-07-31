@@ -54,6 +54,7 @@ export const Success = () => {
                                 <Typography key={idx}>- {x}</Typography>
                               </>
                             ))}
+                            <Empty height="1rem" />
                           </>
                         )
                       )}
