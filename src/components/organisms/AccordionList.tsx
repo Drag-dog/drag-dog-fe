@@ -115,6 +115,7 @@ export const AccordionList = ({
                   {setSelected && selected && (
                     <Checkbox
                       checked={selected[idx]}
+                      onClick={(e) => e.stopPropagation()}
                       onChange={(e) => {
                         e.stopPropagation();
                         setSelected((prev) => {

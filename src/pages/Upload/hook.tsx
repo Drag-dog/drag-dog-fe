@@ -95,33 +95,24 @@ export const useUpload = () => {
   const selectBoxModal = useModal();
   const propsGenerateProposalSummary = React.useRef<{
     referenceFileIds: string[];
-    answerType: string;
-  }>({ referenceFileIds: [""], answerType: "" });
+  }>({ referenceFileIds: [""] });
   const mutPostGenerateProposalSummary = useMutation({
-    mutationFn: async ({
-      pdf,
-      referenceFileIds,
-      answerType,
-    }: {
-      pdf: File;
-      referenceFileIds: string[];
-      answerType: string;
-    }) => {
+    mutationFn: async ({ pdf, referenceFileIds }: { pdf: File; referenceFileIds: string[] }) => {
       const proposalSummary = await proposalApi.postGenerateProposalSummary({ accessToken, pdf });
       setProposalSummary(proposalSummary);
-      propsGenerateProposalSummary.current = { referenceFileIds, answerType };
+      propsGenerateProposalSummary.current = { referenceFileIds };
     },
     onSuccess: () => selectBoxModal.handleOpen(),
   });
 
   const mutPostAnswerProposal = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (answerType: string) => {
       await Promise.all(
         Object.entries(proposalSummary).map(async ([key, props]) => {
           const value = await proposalApi.postAnswerProposal({
             accessToken,
             referenceFileIds: propsGenerateProposalSummary.current.referenceFileIds,
-            answerType: propsGenerateProposalSummary.current.answerType,
+            answerType,
             ...props,
           });
           setResProposal((prev) => [...prev, value]);
@@ -197,6 +188,7 @@ export const useUpload = () => {
   );
 
   const SelectBoxModal = () => {
+    const [answerType, setAnswerType] = React.useState<string>("");
     const [selected, setSelected] = React.useState<boolean[]>(
       Object.entries(proposalSummary).map((x) => true)
     );
@@ -235,6 +227,19 @@ export const useUpload = () => {
           setSelected={setSelected}
         />
         <Empty height="1rem" />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "baseline" }}>
+            <Typography>응답 형식</Typography>
+            <Typography variant="caption">
+              (서술형이면 자세히, 요약형이면 간단히 출력이 됩니다.)
+            </Typography>
+          </div>
+          <RadioGroup row onChange={(e) => setAnswerType(e.target.value)}>
+            <FormControlLabel value="descriptive" control={<Radio size="small" />} label="서술형" />
+            <FormControlLabel value="summary" control={<Radio size="small" />} label="요약형" />
+          </RadioGroup>
+        </div>
+        <Empty height="1rem" />
         <div
           style={{
             width: "100%",
@@ -257,7 +262,7 @@ export const useUpload = () => {
               );
               setProposalSummary(Object.fromEntries(selectedSummary));
               setSelectedSummary(selectedSummary.map((x) => x[1].question!));
-              mutPostAnswerProposal.mutate();
+              mutPostAnswerProposal.mutate(answerType);
               selectBoxModal.handleClose();
             }}
           >

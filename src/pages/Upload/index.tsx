@@ -151,7 +151,6 @@ export const Upload = () => {
                       generateNewProposal({
                         pdf: e.target.files[0],
                         referenceFileIds,
-                        answerType: "descriptive",
                       });
                     }}
                   />

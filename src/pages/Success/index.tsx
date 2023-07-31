@@ -9,7 +9,7 @@ import { appColor } from "../../constants/appColor";
 export const Success = () => {
   const resProposal = useAtomValue(resProposalsAtom);
   const question = useAtomValue(questionAtom);
-
+  console.log(resProposal);
   return (
     <PageLayout>
       <PageLayout.Title />
@@ -32,15 +32,33 @@ export const Success = () => {
                 </Typography>
                 <Empty height="1rem" />
                 <div style={{ padding: "1rem 1rem" }}>
-                  {resProposal[idx]
-                    .replace(/\n\n/g, "\n")
-                    .split("\n")
-                    .map((line) => (
-                      <>
-                        <Typography key={idx}>- {line}</Typography>
-                        <Empty height="1rem" />
-                      </>
-                    ))}
+                  {typeof resProposal[idx] === "string" ? (
+                    (resProposal[idx] as string)
+                      .replace(/\n\n/g, "\n")
+                      .split("\n")
+                      .map((line) => (
+                        <>
+                          <Typography key={idx}>- {line}</Typography>
+                          <Empty height="1rem" />
+                        </>
+                      ))
+                  ) : (
+                    <>
+                      {(resProposal[idx] as { additional?: string[]; answer: string }[]).map(
+                        (val) => (
+                          <>
+                            <Typography variant="h6">■ {val.answer}</Typography>
+                            {val.additional?.map((x) => (
+                              <>
+                                <Empty height="1rem" />
+                                <Typography key={idx}>- {x}</Typography>
+                              </>
+                            ))}
+                          </>
+                        )
+                      )}
+                    </>
+                  )}
                 </div>
                 <Empty height="2rem" />
               </>
