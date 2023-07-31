@@ -9,8 +9,9 @@ import ModeIcon from "@mui/icons-material/Mode";
 import Button from "@mui/material/Button";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { UseMutateFunction } from "react-query";
+import Checkbox from "@mui/material/Checkbox";
 
-const Accordion = styled((props: AccordionProps) => (
+export const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
 ))(({ theme }) => ({
   border: `1px solid ${theme.palette.divider}`,
@@ -18,7 +19,7 @@ const Accordion = styled((props: AccordionProps) => (
   "&:before": { display: "none" },
 }));
 
-const AccordionSummary = styled((props: AccordionSummaryProps) => (
+export const AccordionSummary = styled((props: AccordionSummaryProps) => (
   <MuiAccordionSummary
     expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.9rem" }} />}
     {...props}
@@ -35,14 +36,19 @@ const AccordionSummary = styled((props: AccordionSummaryProps) => (
   },
 }));
 
-const AccordionTextField = styled(TextField)(({ theme }) => ({ width: "100%" }));
-const AccordionTypography = styled(Typography)(({ theme }) => ({ width: "100%", margin: "1rem" }));
+export const AccordionTextField = styled(TextField)(({ theme }) => ({ width: "100%" }));
+export const AccordionTypography = styled(Typography)(({ theme }) => ({
+  width: "100%",
+  margin: "1rem",
+}));
 
 export const AccordionList = ({
   contentList,
   setContents,
   update,
   summaryId,
+  selected,
+  setSelected,
 }: PropsAccordionList) => {
   const [expanded, setExpanded] = React.useState<number>(-1);
   const [isEditMode, setIsEditMode] = React.useState<boolean>(false);
@@ -106,6 +112,19 @@ export const AccordionList = ({
                       <ModeIcon />
                     </Button>
                   )}
+                  {setSelected && selected && (
+                    <Checkbox
+                      checked={selected[idx]}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setSelected((prev) => {
+                          const temp = [...prev];
+                          temp[idx] = e.target.checked;
+                          return temp;
+                        });
+                      }}
+                    />
+                  )}
                 </div>
               </div>
             </AccordionSummary>
@@ -133,6 +152,9 @@ type PropsAccordionList = {
   setContents?: React.Dispatch<React.SetStateAction<Content>>;
   update?: UseMutateFunction<any, unknown, { summaryId: string; summaries: object }, unknown>;
   summaryId?: string;
+  // checkbox용
+  selected?: boolean[];
+  setSelected?: React.Dispatch<React.SetStateAction<boolean[]>>;
 };
 
 export type Content = { [key: string]: string[] };

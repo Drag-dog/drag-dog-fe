@@ -209,6 +209,17 @@ export const useUpload = () => {
     const [selected, setSelected] = React.useState<boolean[]>(
       Object.entries(proposalSummary).map((x) => true)
     );
+
+    const proposalSummaryContentList = Object.assign(
+      {},
+      ...Object.entries(proposalSummary).map(([_, props]) => ({
+        [props.question as string]: [
+          `글자수 제한 : ${props.characterLimit}`,
+          `작성시 주의사항 : ${props.noteWhenWriting}`,
+          `포함되어야 하는 내용 : ${props.contentsToInclude}`,
+        ],
+      }))
+    );
     return (
       <selectBoxModal.Modal>
         <div
@@ -224,42 +235,11 @@ export const useUpload = () => {
           <Typography variant="caption">(선택하신 항목으로 사업계획서를 작성합니다.)</Typography>
         </div>
         <Empty height="1rem" />
-        <List sx={{ width: "100%" }}>
-          {Object.entries(proposalSummary).map(([key, props], idx) => (
-            <ListItem
-              key={key}
-              sx={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "space-between",
-                textDecoration: !selected[idx] ? "line-through" : "",
-                color: !selected[idx] ? "gray" : "",
-              }}
-            >
-              <Typography
-                sx={{
-                  maxWidth: "70%",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                  textAlign: "baseline",
-                }}
-              >
-                {`${idx + 1}. ${props.question}`}
-              </Typography>
-              <Checkbox
-                checked={selected[idx]}
-                onChange={(e) =>
-                  setSelected((prev) => {
-                    const temp = [...prev];
-                    temp[idx] = e.target.checked;
-                    return temp;
-                  })
-                }
-              />
-            </ListItem>
-          ))}
-        </List>
+        <AccordionList
+          contentList={proposalSummaryContentList}
+          selected={selected}
+          setSelected={setSelected}
+        />
         <Empty height="1rem" />
         <div
           style={{
