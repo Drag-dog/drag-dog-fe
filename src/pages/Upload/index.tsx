@@ -23,6 +23,8 @@ export const Upload = () => {
     generateProposalSummaryLoading,
     SuccessAlert,
     SelectBoxModal,
+    UploadModal,
+    openUploadModal,
   } = useUpload();
   const { Loading } = useLoading();
 
@@ -37,6 +39,7 @@ export const Upload = () => {
       <PageLayout.Absolute>
         {isSummaryLoading && <Loading />}
         <Alert>오류가 발생했습니다.</Alert>
+        <UploadModal />
         <SummaryModal />
         <SuccessAlert />
         <SelectBoxModal />
@@ -107,6 +110,19 @@ export const Upload = () => {
                   width: "50%",
                 }}
               >
+                <Button
+                  variant="contained"
+                  component="label"
+                  sx={{
+                    width: "50%",
+                    height: "4rem",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                  onClick={openUploadModal}
+                >
+                  <Typography>단일 항목 작성하기</Typography>
+                </Button>
                 <Empty width="1rem" />
                 <Button
                   variant="contained"
@@ -118,7 +134,7 @@ export const Upload = () => {
                     flexDirection: "column",
                   }}
                 >
-                  <Typography>AI 사업 계획서 작성하기</Typography>
+                  <Typography>⭐ AI 사업 계획서 작성하기</Typography>
                   <Typography variant="caption">
                     (새 양식에 맞게 사업 계획서를 작성합니다.)
                   </Typography>

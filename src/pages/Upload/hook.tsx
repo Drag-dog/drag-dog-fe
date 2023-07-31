@@ -2,7 +2,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "react-query";
 import { useIsSignIn } from "../../hooks/useIsSignIn";
-import { ResPostGenerateProposalSummary, proposalApi } from "../../apis/proposal";
+import {
+  PropsPostAnswerProposal,
+  ResPostGenerateProposalSummary,
+  proposalApi,
+} from "../../apis/proposal";
 import { useAtomValue, useSetAtom } from "jotai";
 import { accessTokenAtom, questionAtom, resProposalsAtom } from "../../store/atoms";
 import { useAlert } from "../../hooks/useAlert";
@@ -12,7 +16,16 @@ import { Empty } from "../../components/atoms";
 import { AccordionList } from "../../components/organisms/AccordionList";
 import { isEmpty } from "../../lib/utils/isEmpty";
 import { LOGIN_STATE } from "../../constants/enum";
-import { List, ListItem, Checkbox, Button } from "@mui/material";
+import {
+  List,
+  ListItem,
+  Checkbox,
+  Button,
+  TextField,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+} from "@mui/material";
 
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
@@ -27,6 +40,7 @@ export const useUpload = () => {
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
   const summaryModal = useModal();
+  const uploadModal = useModal(); // 단일 항목 업로드 모달
   const setSelectedSummary = useSetAtom(questionAtom);
 
   // [Todo] mutaion이 아닌 query로 변경 필요
@@ -124,6 +138,17 @@ export const useUpload = () => {
       );
     },
     onSuccess: () => navigate("/success"),
+  });
+
+  const mutGenerateProposalByOneContents = useMutation({
+    mutationFn: async ({ ...props }: Omit<PropsPostAnswerProposal, "accessToken">) => {
+      uploadModal.handleClose();
+      return await proposalApi.postAnswerProposal({ accessToken, ...props });
+    },
+    onSuccess: (res) => {
+      setResProposal([res]);
+      navigate("/success");
+    },
   });
 
   const [isSelectedProposalList, setIsSelectedProposalList] = React.useState<boolean[]>([]);
@@ -269,6 +294,106 @@ export const useUpload = () => {
     );
   };
 
+  const UploadModal = () => {
+    const [question, setQuestion] = React.useState<string>("");
+    const setQuestionAtStorage = useSetAtom(questionAtom);
+    const [characterLimit, setCharacterLimit] = React.useState<number>(0);
+    const [contentToInclude, setContentToInclude] = React.useState<string>("");
+    const [noteWhenWriting, setNoteWhenWriting] = React.useState<string>("");
+    const [answerType, setAnswerType] = React.useState<string>("");
+
+    return (
+      <uploadModal.Modal>
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Typography variant="h4">사업 계획서 항목 별로 작성하기</Typography>
+          <Empty height="1rem" />
+          <Typography>학습시킬 사업 계획서의 문항을 입력해주세요.</Typography>
+          <TextField
+            placeholder="ex) 사업 개요"
+            onChange={(e) => {
+              setQuestion(e.target.value);
+              setQuestionAtStorage([e.target.value]);
+            }}
+          />
+          <Empty height="2rem" />{" "}
+          <div style={{ display: "flex", alignItems: "baseline" }}>
+            <Typography>희망 글자수</Typography>
+            <Typography variant="caption">(숫자만 입력해주세요!)</Typography>
+          </div>
+          <TextField
+            type="number"
+            placeholder="ex) 500"
+            onChange={(e) => setCharacterLimit(Number(e.target.value))}
+          />
+          <Empty height="2rem" />
+          <div style={{ display: "flex", alignItems: "baseline" }}>
+            <Typography>필수 내용</Typography>
+            <Typography variant="caption">(","를 이용해 필수 내용을 구분해주세요!)</Typography>
+          </div>
+          <TextField
+            placeholder={`ex) 제작목표, 제작 내용 및 제작 범위, 소요 기간, 제작 방법(자체,외주)`}
+            onChange={(e) => setContentToInclude(e.target.value)}
+          />
+          <Empty height="2rem" />
+          <div style={{ display: "flex", alignItems: "baseline" }}>
+            <Typography>조건 </Typography>
+            <Typography variant="caption">(","를 이용해 조건을 구분해주세요!)</Typography>
+          </div>
+          <TextField
+            placeholder={`ex) 20년 베테랑 CEO의 역할을 맡았다고 생각하고 작성, 꼼꼼하게 작성`}
+            onChange={(e) => setNoteWhenWriting(e.target.value)}
+          />
+          <Empty height="2rem" />
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "baseline" }}>
+              <Typography>응답 형식</Typography>
+              <Typography variant="caption">
+                (서술형이면 자세히, 요약형이면 간단히 출력이 됩니다.)
+              </Typography>
+            </div>
+            <RadioGroup row onChange={(e) => setAnswerType(e.target.value)}>
+              <FormControlLabel
+                value="descriptive"
+                control={<Radio size="small" />}
+                label="서술형"
+              />
+              <FormControlLabel value="summary" control={<Radio size="small" />} label="요약형" />
+            </RadioGroup>
+          </div>
+          <Empty height="5rem" />
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            <Button
+              variant="contained"
+              sx={{ width: "50%", height: "4rem" }}
+              onClick={() => {
+                const referenceFileIds = posts
+                  .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
+                  .filter((id) => id !== null) as string[];
+
+                mutGenerateProposalByOneContents.mutate({
+                  referenceFileIds,
+                  question,
+                  contentsToInclude: contentToInclude.split(","),
+                  characterLimit: String(characterLimit),
+                  noteWhenWriting: noteWhenWriting.split(","),
+                  answerType,
+                });
+              }}
+            >
+              AI 사업계획서 답변받기
+            </Button>
+          </div>
+        </div>
+      </uploadModal.Modal>
+    );
+  };
+
   React.useLayoutEffect(() => {
     // [Error] 토큰이 있는데 로그인 페이지로 이동하는 문제
     if (loginState === LOGIN_STATE.NOT_LOGGED_IN) {
@@ -288,12 +413,16 @@ export const useUpload = () => {
     getPropsalSummary: mutGetPropsalSummary.mutate,
     generateNewProposal: mutPostGenerateProposalSummary.mutate,
     generateProposalSummaryLoading:
-      mutPostGenerateProposalSummary.isLoading || mutPostAnswerProposal.isLoading,
+      mutPostGenerateProposalSummary.isLoading ||
+      mutPostAnswerProposal.isLoading ||
+      mutGenerateProposalByOneContents.isLoading,
     onDelete,
     isSummaryLoading: mutSummaizePdf.isLoading,
     Alert,
     SuccessAlert,
     SummaryModal,
     SelectBoxModal,
+    UploadModal,
+    openUploadModal: uploadModal.handleOpen,
   };
 };
