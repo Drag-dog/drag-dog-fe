@@ -192,20 +192,6 @@ export const useUpload = () => {
     const [selected, setSelected] = React.useState<boolean[]>(
       Object.entries(proposalSummary).map((x) => true)
     );
-
-    const proposalSummaryContentList = Object.assign(
-      {},
-      ...Object.entries(proposalSummary).map(([_, props]) => {
-        const res = [];
-        !!props.noteWhenWriting && res.push(`작성시 주의사항 : ${props.noteWhenWriting}`);
-        !!props.contentsToInclude && res.push(`포함되어야 하는 내용 : ${props.contentsToInclude}`);
-        !!props.characterLimit && res.push(`글자수 제한 : ${props.characterLimit}`);
-
-        return {
-          [props.question as string]: res.length === 0 ? ["조건이 없습니다."] : [...res],
-        };
-      })
-    );
     return (
       <selectBoxModal.Modal>
         <div
@@ -222,9 +208,10 @@ export const useUpload = () => {
         </div>
         <Empty height="1rem" />
         <AccordionList
-          contentList={proposalSummaryContentList}
+          proposalSummary={proposalSummary}
           selected={selected}
           setSelected={setSelected}
+          // setProposalSummary={setProposalSummary}
         />
         <Empty height="1rem" />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
