@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "react-query";
 import { useIsSignIn } from "../../hooks/useIsSignIn";
+
 import {
   PropsPostAnswerProposal,
   ResPostGenerateProposalSummary,
@@ -17,6 +18,11 @@ import { AccordionList } from "../../components/organisms/AccordionList";
 import { isEmpty } from "../../lib/utils/isEmpty";
 import { LOGIN_STATE } from "../../constants/enum";
 import { Button, TextField, RadioGroup, Radio, FormControlLabel } from "@mui/material";
+
+interface ProposalInputType {
+  proposalSummary: ResPostGenerateProposalSummary;
+  answerType: string
+}
 
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
@@ -106,21 +112,23 @@ export const useUpload = () => {
   });
 
   const mutPostAnswerProposal = useMutation({
-    mutationFn: async (answerType: string) => {
-      await Promise.all(
-        Object.entries(proposalSummary).map(async ([key, props]) => {
-          const value = await proposalApi.postAnswerProposal({
-            accessToken,
-            referenceFileIds: propsGenerateProposalSummary.current.referenceFileIds,
-            answerType,
-            ...props,
-          });
-          setResProposal((prev) => [...prev, value]);
-        })
-      );
-    },
-    onSuccess: () => navigate("/success"),
-  });
+      mutationFn: async (input: ProposalInputType) => {
+        const { proposalSummary, answerType } = input;
+        await Promise.all(
+          Object.entries(proposalSummary).map(async ([key, props]) => {
+            const value = await proposalApi.postAnswerProposal({
+              accessToken,
+              referenceFileIds: propsGenerateProposalSummary.current.referenceFileIds,
+              answerType,
+              ...props,
+            });
+            setResProposal((prev) => [...prev, value]);
+          })
+        );
+      },
+      onSuccess: () => navigate("/success"),
+    }
+  );
 
   const mutGenerateProposalByOneContents = useMutation({
     mutationFn: async ({ ...props }: Omit<PropsPostAnswerProposal, "accessToken">) => {
@@ -186,7 +194,6 @@ export const useUpload = () => {
       <Typography>요약된 사업계획서가 수정되었습니다.</Typography>
     </successAlert.Alert>
   );
-
   const SelectBoxModal = () => {
     const [answerType, setAnswerType] = React.useState<string>("");
     const [selected, setSelected] = React.useState<boolean[]>(
@@ -221,7 +228,7 @@ export const useUpload = () => {
               (서술형이면 자세히, 요약형이면 간단히 출력이 됩니다.)
             </Typography>
           </div>
-          <RadioGroup row onChange={(e) => setAnswerType(e.target.value)}>
+          <RadioGroup row onChange={(e) => setAnswerType(e.target.value)} defaultValue={'descriptive'}>
             <FormControlLabel value="descriptive" control={<Radio size="small" />} label="서술형" />
             <FormControlLabel value="summary" control={<Radio size="small" />} label="요약형" />
           </RadioGroup>
@@ -247,9 +254,10 @@ export const useUpload = () => {
               const selectedSummary = Object.entries(proposalSummary).filter(
                 (_, idx) => selected[idx]
               );
-              setProposalSummary(Object.fromEntries(selectedSummary));
-              setSelectedSummary(selectedSummary.map((x) => x[1].question!));
-              mutPostAnswerProposal.mutate(answerType);
+              mutPostAnswerProposal.mutate({
+                answerType,
+                proposalSummary: Object.fromEntries(selectedSummary)
+              });
               selectBoxModal.handleClose();
             }}
           >
@@ -266,7 +274,7 @@ export const useUpload = () => {
     const [characterLimit, setCharacterLimit] = React.useState<number>(0);
     const [contentToInclude, setContentToInclude] = React.useState<string>("");
     const [noteWhenWriting, setNoteWhenWriting] = React.useState<string>("");
-    const [answerType, setAnswerType] = React.useState<string>("");
+    const [answerType, setAnswerType] = React.useState<string>("descriptive");
 
     return (
       <uploadModal.Modal>
@@ -323,12 +331,8 @@ export const useUpload = () => {
                 (서술형이면 자세히, 요약형이면 간단히 출력이 됩니다.)
               </Typography>
             </div>
-            <RadioGroup row onChange={(e) => setAnswerType(e.target.value)}>
-              <FormControlLabel
-                value="descriptive"
-                control={<Radio size="small" />}
-                label="서술형"
-              />
+            <RadioGroup row onChange={(e) => setAnswerType(e.target.value)} defaultValue={'descriptive'}>
+              <FormControlLabel value="descriptive" control={<Radio size="small" />} label="서술형" />
               <FormControlLabel value="summary" control={<Radio size="small" />} label="요약형" />
             </RadioGroup>
           </div>
@@ -339,9 +343,8 @@ export const useUpload = () => {
               sx={{ width: "50%", height: "4rem" }}
               onClick={() => {
                 const referenceFileIds = posts
-                  .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
-                  .filter((id) => id !== null) as string[];
-
+                .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
+                .filter((id) => id !== null) as string[];
                 mutGenerateProposalByOneContents.mutate({
                   referenceFileIds,
                   question,
