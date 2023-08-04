@@ -56,7 +56,8 @@ export const useUpload = () => {
     mutationFn: async (file: File) => {
       return await proposalApi.postSummarizePdf({ accessToken, file });
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
+      setSummary(res)
       summaryModal.handleOpen();
       mutGetFileInfoList.mutate();
     },
