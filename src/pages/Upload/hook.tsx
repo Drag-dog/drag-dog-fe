@@ -115,17 +115,23 @@ export const useUpload = () => {
   const mutPostAnswerProposal = useMutation({
       mutationFn: async (input: ProposalInputType) => {
         const { proposalSummary, answerType } = input;
-        await Promise.all(
+        const result = await Promise.all(
           Object.entries(proposalSummary).map(async ([key, props]) => {
-            const value = await proposalApi.postAnswerProposal({
-              accessToken,
-              referenceFileIds: propsGenerateProposalSummary.current.referenceFileIds,
-              answerType,
-              ...props,
-            });
-            setResProposal((prev) => [...prev, value]);
+            try {
+              return await proposalApi.postAnswerProposal({
+                accessToken,
+                referenceFileIds: propsGenerateProposalSummary.current.referenceFileIds,
+                answerType,
+                ...props,
+              });
+            } catch (e) {
+              console.log(e)
+              return '다시한번 시도해주세요'
+            }
           })
         );
+        setResProposal(result);
+
       },
       onSuccess: () => navigate("/success"),
     }
@@ -196,7 +202,7 @@ export const useUpload = () => {
     </successAlert.Alert>
   );
   const SelectBoxModal = () => {
-    const [answerType, setAnswerType] = React.useState<string>("");
+    const [answerType, setAnswerType] = React.useState<string>("descriptive");
     const [selected, setSelected] = React.useState<boolean[]>(
       Object.entries(proposalSummary).map((x) => true)
     );
@@ -255,6 +261,7 @@ export const useUpload = () => {
               const selectedSummary = Object.entries(proposalSummary).filter(
                 (_, idx) => selected[idx]
               );
+              setSelectedSummary(selectedSummary.map((x) => x[1].question!));
               mutPostAnswerProposal.mutate({
                 answerType,
                 proposalSummary: Object.fromEntries(selectedSummary)
