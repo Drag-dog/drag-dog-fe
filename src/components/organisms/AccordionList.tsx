@@ -18,6 +18,7 @@ import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import Paper from "@mui/material/Paper";
+import { useEffect } from "react";
 
 export const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -60,16 +61,29 @@ export const AccordionList = ({
   setSelected,
   setProposalSummary,
 }: PropsAccordionList) => {
-  const [expanded, setExpanded] = React.useState<number>(-1);
+  // const [expanded, setExpanded] = React.useState<number>(-1);
   const [isEditMode, setIsEditMode] = React.useState<boolean>(false);
   const [_contents, _setContents] = React.useState<Content>(!!contentList ? contentList : {});
   const [_proposalSummary, _setProposalSummary] = React.useState(
     !!proposalSummary ? proposalSummary : {}
   );
+  const [expanded, setExpanded] = React.useState<boolean[]>([]);
+
+  useEffect(() => {
+    if (selected) {
+      setExpanded(Array(selected.length || 0).fill(true))
+    } else if (contentList) {
+      setExpanded(Array(Object.keys(contentList || {}).length).fill(true))
+    }
+  }, [contentList, selected])
 
   const handleChange =
     (panelIdx: number) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-      setExpanded(newExpanded ? panelIdx : -1);
+      setExpanded((prevExpanded) => {
+        const copy = [...prevExpanded];
+        copy[panelIdx] = newExpanded;
+        return copy;
+      });
       setIsEditMode(false);
     };
 
@@ -79,7 +93,7 @@ export const AccordionList = ({
         Object.entries(_contents).map((section, idx) => {
           const [title, content] = section;
           return (
-            <Accordion expanded={expanded === idx} onChange={handleChange(idx)}>
+            <Accordion expanded={expanded[idx] || false} onChange={handleChange(idx)}>
               <AccordionSummary>
                 <div
                   style={{
@@ -91,7 +105,7 @@ export const AccordionList = ({
                 >
                   <Typography>{`${idx + 1}. ${title}`}</Typography>
                   <div>
-                    {setContents && expanded === idx && (
+                    {setContents && expanded[idx] && (
                       <Button
                         color={isEditMode ? "primary" : "inherit"}
                         onClick={(e) => {
@@ -112,7 +126,7 @@ export const AccordionList = ({
                         )}
                       </Button>
                     )}
-                    {setContents && expanded === idx && isEditMode && (
+                    {setContents && expanded[idx] && isEditMode && (
                       <Button
                         color="primary"
                         onClick={(e) => {
@@ -149,7 +163,7 @@ export const AccordionList = ({
         Object.entries(_proposalSummary).map((section, idx) => {
           const { characterLimit, question, noteWhenWriting, contentsToInclude } = section[1];
           return (
-            <Accordion expanded={expanded === idx} onChange={handleChange(idx)}>
+            <Accordion expanded={expanded[idx] || false} onChange={handleChange(idx)}>
               <AccordionSummary>
                 <div
                   style={{
@@ -166,7 +180,7 @@ export const AccordionList = ({
                     }}
                   >{`${idx + 1}. ${question}`}</Typography>
                   <div>
-                    {setProposalSummary && expanded === idx && (
+                    {setProposalSummary && expanded[idx] && (
                       <Button
                         color={isEditMode ? "primary" : "inherit"}
                         onClick={(e) => {
@@ -187,7 +201,7 @@ export const AccordionList = ({
                         )}
                       </Button>
                     )}
-                    {setProposalSummary && expanded === idx && isEditMode && (
+                    {setProposalSummary && expanded[idx] && isEditMode && (
                       <Button
                         color="primary"
                         onClick={(e) => {
