@@ -10,14 +10,14 @@ import Button from "@mui/material/Button";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { UseMutateFunction } from "react-query";
 import Checkbox from "@mui/material/Checkbox";
-import { ResPostGenerateProposalSummary } from "../../apis/proposal";
+import { ProposalSummary, ResPostGenerateProposalSummary } from "../../apis/proposal";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import Paper from "@mui/material/Paper";
-import { useEffect } from "react";
+import { ProposalSummaryProxy } from "../../pages/Upload/proxys/ProposalSummary.proxy";
 
 export const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -63,7 +63,7 @@ export const AccordionTypography = styled(Typography)(({ theme }) => ({
 export const AccordionList = ({
   contentList,
   proposalSummary,
-  setContents,
+  setProposalSummaryList,
   update,
   summaryId,
   selected,
@@ -74,13 +74,15 @@ export const AccordionList = ({
    * @description 수정 모드인 index를 저장. 수정 모드가 없을 경우, -1
    */
   const [isEditMode, setIsEditMode] = React.useState<number>(-1);
-  const [_contents, _setContents] = React.useState<Content>(!!contentList ? contentList : {});
+  const [_contents, _setProposalSummaryList] = React.useState<ContentList>(
+    !!contentList ? contentList : []
+  );
   const [_proposalSummary, _setProposalSummary] = React.useState(
     !!proposalSummary ? proposalSummary : {}
   );
   const [expanded, setExpanded] = React.useState<boolean[]>([]);
 
-  useEffect(() => {
+  React.useLayoutEffect(() => {
     if (selected) {
       setExpanded(Array(selected.length || 0).fill(true));
     } else if (contentList) {
@@ -101,8 +103,8 @@ export const AccordionList = ({
   return (
     <>
       {!!_contents &&
-        Object.entries(_contents).map((section, idx) => {
-          const [title, content] = section;
+        _contents.map((section, idx) => {
+          const { title, content } = section;
           return (
             <Accordion key={title} expanded={expanded[idx] || false} onChange={handleChange(idx)}>
               <AccordionSummary>
@@ -116,7 +118,7 @@ export const AccordionList = ({
                 >
                   <Typography>{`${idx + 1}. ${title}`}</Typography>
                   <div>
-                    {setContents && expanded[idx] && (
+                    {setProposalSummaryList && expanded[idx] && (
                       <Button
                         color={isEditMode === idx ? "primary" : "inherit"}
                         onClick={(e) => {
@@ -137,17 +139,25 @@ export const AccordionList = ({
                         )}
                       </Button>
                     )}
-                    {setContents && expanded[idx] && isEditMode === idx && (
+                    {setProposalSummaryList && expanded[idx] && isEditMode === idx && (
                       <Button
                         color="primary"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setContents?.((prev) => ({ ...prev, [title]: _contents.title }));
-                          setIsEditMode(idx);
-                          update?.({ summaryId: summaryId!, summaries: _contents });
+                          setProposalSummaryList?.((prev) => {
+                            const copy = [...prev];
+                            copy[idx].title = title;
+                            copy[idx].content = content;
+                            return copy;
+                          });
+                          setIsEditMode(-1);
+                          update?.({
+                            summaryId: summaryId!,
+                            summaries: ProposalSummaryProxy.toBE(_contents),
+                          });
                         }}
                       >
-                        <Typography variant="caption">추가하기</Typography>
+                        <Typography variant="caption">저장하기</Typography>
                         <ModeIcon />
                       </Button>
                     )}
@@ -160,7 +170,11 @@ export const AccordionList = ({
                   multiline
                   rows={3}
                   onChange={(e) => {
-                    _setContents((prev) => ({ ...prev, [title]: e.target.value.split("\n") }));
+                    _setProposalSummaryList((prev) => {
+                      const copy = [...prev];
+                      copy[idx].content = e.target.value.split("\n");
+                      return copy;
+                    });
                   }}
                 />
               ) : (
@@ -339,10 +353,15 @@ export const AccordionList = ({
 };
 
 type PropsAccordionList = {
-  contentList?: Content;
+  contentList?: ContentList;
   proposalSummary?: ResPostGenerateProposalSummary;
-  setContents?: React.Dispatch<React.SetStateAction<Content>>;
-  update?: UseMutateFunction<any, unknown, { summaryId: string; summaries: object }, unknown>;
+  setProposalSummaryList?: React.Dispatch<React.SetStateAction<ContentList>>;
+  update?: UseMutateFunction<
+    any,
+    unknown,
+    { summaryId: string; summaries: ProposalSummary },
+    unknown
+  >;
   summaryId?: string;
   // checkbox용
   selected?: boolean[];
@@ -350,4 +369,4 @@ type PropsAccordionList = {
   setProposalSummary?: React.Dispatch<React.SetStateAction<ResPostGenerateProposalSummary>>;
 };
 
-export type Content = { [key: string]: string[] };
+export type ContentList = { title: string; content: string[] }[];

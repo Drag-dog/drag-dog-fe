@@ -4,6 +4,7 @@ import { useMutation } from "react-query";
 import { useIsSignIn } from "../../hooks/useIsSignIn";
 
 import {
+  ProposalSummary,
   PropsPostAnswerProposal,
   ResPostGenerateProposalSummary,
   proposalApi,
@@ -14,10 +15,11 @@ import { useAlert } from "../../hooks/useAlert";
 import { useModal } from "../../hooks/useModal";
 import Typography from "@mui/material/Typography/Typography";
 import { Empty } from "../../components/atoms";
-import { AccordionList } from "../../components/organisms/AccordionList";
+import { AccordionList, ContentList } from "../../components/organisms/AccordionList";
 import { LOGIN_STATE } from "../../constants/enum";
 import { Button, TextField, RadioGroup, Radio, FormControlLabel } from "@mui/material";
 import { ProposalSummaryModal } from "./components/ProposalSummaryModal";
+import { ProposalSummaryProxy } from "./proxys/ProposalSummary.proxy";
 
 interface ProposalInputType {
   proposalSummary: ResPostGenerateProposalSummary;
@@ -35,7 +37,7 @@ export const useUpload = () => {
   const { openAlert, Alert } = useAlert();
   const successAlert = useAlert();
   const { loginState } = useIsSignIn();
-  const [proposalSummary, setProposalSummary] = React.useState<ProposalSummary>({});
+  const [proposalSummaryList, setProposalSummaryList] = React.useState<ContentList>([]);
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
   const summaryModal = useModal();
@@ -58,10 +60,10 @@ export const useUpload = () => {
     mutationFn: async (file: File) => {
       return await proposalApi.postSummarizePdf({ accessToken, file });
     },
-    onSuccess: (res) => {
-      setProposalSummary(res);
-      summaryModal.handleOpen();
+    onSuccess: async (res) => {
+      setProposalSummaryList(res);
       mutGetProposalInfoList.mutate();
+      summaryModal.handleOpen();
     },
     onError: () => openAlert(),
   });
@@ -83,29 +85,41 @@ export const useUpload = () => {
       return await proposalApi.getPropsalSummary({ accessToken, proposalKey });
     },
     onSuccess: (res) => {
-      setProposalSummary(res.data);
+      setProposalSummaryList(ProposalSummaryProxy.toFE(res.data));
       summaryModal.handleOpen();
     },
   });
 
-  const mutPutProposals = useMutation({
-    mutationFn: async ({ summaryId, summaries }: { summaryId: string; summaries: object }) => {
+  // [Error] '수정하기' 실행 시, 알 수 없는 리렌더링이 뒤늦게 발생함
+  const mutEditProposalSummary = useMutation({
+    mutationFn: async ({
+      summaryId,
+      summaries,
+    }: {
+      summaryId: string;
+      summaries: ProposalSummary;
+    }) => {
       return await proposalApi.putProposalSummary({
         accessToken,
         summaryId,
         summaries,
       });
     },
-    onSuccess: () => {
-      mutGetPropsalSummary.mutate(Number(openedSummaryId));
+    onSuccess: async () => {
+      const res = await proposalApi.getPropsalSummary({
+        accessToken,
+        proposalKey: Number(openedSummaryId),
+      });
+      setProposalSummaryList(ProposalSummaryProxy.toFE(res.data));
       successAlert.openAlert();
     },
-    onError: () => openAlert(),
+    onError: () => {
+      openAlert();
+    },
   });
 
-  const [_proposalSummary, _setProposalSummary] = React.useState<ResPostGenerateProposalSummary>(
-    {}
-  );
+  const [_proposalSummary, _setProposalSummaryList] =
+    React.useState<ResPostGenerateProposalSummary>({});
   const selectBoxModal = useModal();
   const propsGenerateProposalSummary = React.useRef<{
     referenceFileIds: string[];
@@ -113,7 +127,7 @@ export const useUpload = () => {
   const mutPostGenerateProposalSummary = useMutation({
     mutationFn: async ({ pdf, referenceFileIds }: { pdf: File; referenceFileIds: string[] }) => {
       const proposalSummary = await proposalApi.postGenerateProposalSummary({ accessToken, pdf });
-      _setProposalSummary(proposalSummary);
+      _setProposalSummaryList(proposalSummary);
       propsGenerateProposalSummary.current = { referenceFileIds };
     },
     onSuccess: () => selectBoxModal.handleOpen(),
@@ -194,7 +208,7 @@ export const useUpload = () => {
           proposalSummary={_proposalSummary}
           selected={selected}
           setSelected={setSelected}
-          // _setProposalSummary={_setProposalSummary}
+          // _setProposalSummaryList={_setProposalSummaryList}
         />
         <Empty height="1rem" />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -381,9 +395,9 @@ export const useUpload = () => {
     ProposalSummaryModal() {
       return (
         <ProposalSummaryModal
-          proposalSummary={proposalSummary}
+          proposalSummaryList={proposalSummaryList}
           Modal={summaryModal.Modal}
-          update={mutPutProposals.mutate}
+          update={mutEditProposalSummary.mutate}
           openedSummaryId={openedSummaryId}
         />
       );
@@ -397,5 +411,3 @@ type FileInfoList = {
   id: number;
   name: string;
 }[];
-
-export type ProposalSummary = { [key: string]: string[] };

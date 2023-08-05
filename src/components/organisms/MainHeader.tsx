@@ -14,7 +14,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import { Empty } from "../../components/atoms";
 import { useMutation } from "react-query";
 import { proposalApi } from "../../apis/proposal";
-import { AccordionList, Content } from "./AccordionList";
+import { AccordionList, ContentList } from "./AccordionList";
 import { useAlert } from "../../hooks/useAlert";
 import { isEmpty } from "../../lib/utils/isEmpty";
 
@@ -23,7 +23,7 @@ export const MainHeader = () => {
   const { loginState } = useIsSignIn();
   const accessToken = useAtomValue(accessTokenAtom);
   const navigate = useNavigate();
-  const [contents, setContents] = React.useState<Content>({});
+  const [contents, setContents] = React.useState<ContentList>([]);
   const setAccessToken = useSetAtom(accessTokenAtom);
 
   const mutSearchContents = useMutation({

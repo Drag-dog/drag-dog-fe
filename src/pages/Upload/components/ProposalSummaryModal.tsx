@@ -3,16 +3,17 @@ import { Typography } from "@mui/material";
 import { Empty } from "../../../components/atoms";
 import { AccordionList } from "../../../components/organisms/AccordionList";
 import { isEmpty } from "../../../lib/utils/isEmpty";
-import { ProposalSummary } from "../hook";
 import { UseMutateFunction } from "react-query";
+import { ContentList } from "../../../components/organisms/AccordionList";
+import { ProposalSummary } from "../../../apis/proposal";
 
 export const ProposalSummaryModal = ({
-  proposalSummary,
+  proposalSummaryList,
   Modal,
   update,
   openedSummaryId,
 }: PropsProposalSummaryModal) => {
-  const [_summary, _setProposalSummary] = React.useState<ProposalSummary>(proposalSummary);
+  const [_proposalSummary, _setProposalSummary] = React.useState<ContentList>(proposalSummaryList);
   return (
     <Modal>
       <div
@@ -28,10 +29,10 @@ export const ProposalSummaryModal = ({
         <Typography variant="caption">(사업계획서의 내용도 수정가능합니다. )</Typography>
       </div>
       <Empty height="1rem" />
-      {!isEmpty(_summary) ? (
+      {!isEmpty(_proposalSummary) ? (
         <AccordionList
-          contentList={_summary}
-          setContents={_setProposalSummary}
+          contentList={_proposalSummary}
+          setProposalSummaryList={_setProposalSummary}
           update={update}
           summaryId={openedSummaryId}
         />
@@ -46,14 +47,14 @@ export const ProposalSummaryModal = ({
 };
 
 type PropsProposalSummaryModal = {
-  proposalSummary: { [key: string]: string[] };
+  proposalSummaryList: ContentList;
   Modal: ({ children }: { children: React.ReactNode }) => JSX.Element;
   update: UseMutateFunction<
     any,
     unknown,
     {
       summaryId: string;
-      summaries: object;
+      summaries: ProposalSummary;
     },
     unknown
   >;
