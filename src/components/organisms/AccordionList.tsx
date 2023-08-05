@@ -13,7 +13,6 @@ import Checkbox from "@mui/material/Checkbox";
 import { ResPostGenerateProposalSummary } from "../../apis/proposal";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
-import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
@@ -45,12 +44,15 @@ export const AccordionSummary = styled((props: AccordionSummaryProps) => (
   },
 }));
 const handleClickToCopy = (text: string) => {
-  navigator.clipboard.writeText(text).then(function () {
-    console.log('Copying to clipboard was successful!');
-  }, function (err) {
-    console.error('Could not copy text: ', err);
-  });
-}
+  navigator.clipboard.writeText(text).then(
+    function () {
+      console.log("Copying to clipboard was successful!");
+    },
+    function (err) {
+      console.error("Could not copy text: ", err);
+    }
+  );
+};
 
 export const AccordionTextField = styled(TextField)(({ theme }) => ({ width: "100%" }));
 export const AccordionTypography = styled(Typography)(({ theme }) => ({
@@ -59,283 +61,282 @@ export const AccordionTypography = styled(Typography)(({ theme }) => ({
 }));
 
 export const AccordionList = ({
-    contentList,
-    proposalSummary,
-    setContents,
-    update,
-    summaryId,
-    selected,
-    setSelected,
-    setProposalSummary,
-  }: PropsAccordionList) => {
-    // const [expanded, setExpanded] = React.useState<number>(-1);
-    const [isEditMode, setIsEditMode] = React.useState<boolean>(false);
-    const [_contents, _setContents] = React.useState<Content>(!!contentList ? contentList : {});
-    const [_proposalSummary, _setProposalSummary] = React.useState(
-      !!proposalSummary ? proposalSummary : {}
-    );
-    const [expanded, setExpanded] = React.useState<boolean[]>([]);
+  contentList,
+  proposalSummary,
+  setContents,
+  update,
+  summaryId,
+  selected,
+  setSelected,
+  setProposalSummary,
+}: PropsAccordionList) => {
+  /**
+   * @description 수정 모드인 index를 저장. 수정 모드가 없을 경우, -1
+   */
+  const [isEditMode, setIsEditMode] = React.useState<number>(-1);
+  const [_contents, _setContents] = React.useState<Content>(!!contentList ? contentList : {});
+  const [_proposalSummary, _setProposalSummary] = React.useState(
+    !!proposalSummary ? proposalSummary : {}
+  );
+  const [expanded, setExpanded] = React.useState<boolean[]>([]);
 
-    useEffect(() => {
-      if (selected) {
-        setExpanded(Array(selected.length || 0).fill(true))
-      } else if (contentList) {
-        setExpanded(Array(Object.keys(contentList || {}).length).fill(true))
-      }
-    }, [contentList, selected])
+  useEffect(() => {
+    if (selected) {
+      setExpanded(Array(selected.length || 0).fill(true));
+    } else if (contentList) {
+      setExpanded(Array(Object.keys(contentList || {}).length).fill(true));
+    }
+  }, [contentList, selected]);
 
-    const handleChange =
-      (panelIdx: number) => (event: React.SyntheticEvent, newExpanded: boolean) => {
-        setExpanded((prevExpanded) => {
-          const copy = [...prevExpanded];
-          copy[panelIdx] = newExpanded;
-          return copy;
-        });
-        setIsEditMode(false);
-      };
+  const handleChange =
+    (panelIdx: number) => (event: React.SyntheticEvent, newExpanded: boolean) => {
+      setExpanded((prevExpanded) => {
+        const copy = [...prevExpanded];
+        copy[panelIdx] = newExpanded;
+        return copy;
+      });
+      setIsEditMode(-1);
+    };
 
-    return (
-      <>
-        {!!_contents &&
-          Object.entries(_contents).map((section, idx) => {
-            const [title, content] = section;
-            return (
-              <Accordion expanded={expanded[idx] || false} onChange={handleChange(idx)}>
-                <AccordionSummary
+  return (
+    <>
+      {!!_contents &&
+        Object.entries(_contents).map((section, idx) => {
+          const [title, content] = section;
+          return (
+            <Accordion key={title} expanded={expanded[idx] || false} onChange={handleChange(idx)}>
+              <AccordionSummary>
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
                 >
-                  <div
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography>{`${idx + 1}. ${title}`}</Typography>
-                    <div>
-                      {setContents && expanded[idx] && (
-                        <Button
-                          color={isEditMode ? "primary" : "inherit"}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsEditMode((prev) => !prev);
-                          }}
-                        >
-                          {isEditMode ? (
-                            <>
-                              <Typography variant="caption">취소하기</Typography>
-                              <ReplyIcon />
-                            </>
-                          ) : (
-                            <>
-                              <Typography variant="caption">수정하기</Typography>
-                              <ModeIcon />
-                            </>
-                          )}
-                        </Button>
-                      )}
-                      {setContents && expanded[idx] && isEditMode && (
-                        <Button
-                          color="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setContents?.((prev) => ({ ...prev, [title]: _contents.title }));
-                            setIsEditMode(false);
-                            update?.({ summaryId: summaryId!, summaries: _contents });
-                          }}
-                        >
-                          <Typography variant="caption">추가하기</Typography>
-                          <ModeIcon />
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                </AccordionSummary>
-                {isEditMode ? (
-                  <AccordionTextField
-                    defaultValue={content.join("\n")}
-                    multiline
-                    rows={3}
-                    onChange={(e) => {
-                      _setContents((prev) => ({ ...prev, [title]: e.target.value.split("\n") }));
-                    }}
-                  />
-                ) : (
-                  <div
-                    onClick={() => handleClickToCopy(content.map((c) => `- ${c}\n`).join(''))}
-                    style={{ cursor: "pointer" }}
-                  >
-                    {content.map((c) => <AccordionTypography
-                    >{`- ${c}`}</AccordionTypography>)
-                    }
-                  </div>
-
-                )}
-              </Accordion>
-            );
-          })}
-        {/* proposalSummary UI */}
-        {!!_proposalSummary &&
-          Object.entries(_proposalSummary).map((section, idx) => {
-            const { characterLimit, question, noteWhenWriting, contentsToInclude } = section[1];
-            return (
-              <Accordion expanded={expanded[idx] || false} onChange={handleChange(idx)}>
-                <AccordionSummary>
-                  <div
-                    style={{
-                      width: "100%",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: selected?.[idx] ? "text.primary" : "Gray",
-                        textDecoration: selected?.[idx] ? "none" : "line-through",
-                      }}
-                    >{`${idx + 1}. ${question}`}</Typography>
-                    <div>
-                      {setProposalSummary && expanded[idx] && (
-                        <Button
-                          color={isEditMode ? "primary" : "inherit"}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setIsEditMode((prev) => !prev);
-                          }}
-                        >
-                          {isEditMode ? (
-                            <>
-                              <Typography variant="caption">취소하기</Typography>
-                              <ReplyIcon />
-                            </>
-                          ) : (
-                            <>
-                              <Typography variant="caption">수정하기</Typography>
-                              <ModeIcon />
-                            </>
-                          )}
-                        </Button>
-                      )}
-                      {setProposalSummary && expanded[idx] && isEditMode && (
-                        <Button
-                          color="primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            console.log(_proposalSummary);
-                            // [Todo] 변경 사항 수정 후 전달하는 로직 구현 필요
-                            setProposalSummary?.((prev) => ({
-                              ...prev,
-                              [question as string]: { ..._proposalSummary },
-                            }));
-                            setIsEditMode(false);
-                          }}
-                        >
-                          <Typography variant="caption">저장하기</Typography>
-                          <ModeIcon />
-                        </Button>
-                      )}
-                      {setSelected && selected && (
-                        <Checkbox
-                          checked={selected[idx]}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            setSelected((prev) => {
-                              const temp = [...prev];
-                              temp[idx] = e.target.checked;
-                              return temp;
-                            });
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                </AccordionSummary>
-                <TableContainer component={Paper}>
-                  <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                    <TableBody>
-                      <TableRow>
-                        <TableCell>작성시 주의사항</TableCell>
-                        {isEditMode ? (
-                          <TableCell align="right">
-                            <AccordionTextField
-                              onChange={(e) => {
-                                _setProposalSummary((prev) => ({
-                                  ...prev,
-                                  [question as string]: {
-                                    ...prev[question as any],
-                                    noteWhenWriting: e.target.value,
-                                  },
-                                }));
-                              }}
-                              defaultValue={noteWhenWriting}
-                              multiline
-                              rows={1}
-                            />
-                          </TableCell>
+                  <Typography>{`${idx + 1}. ${title}`}</Typography>
+                  <div>
+                    {setContents && expanded[idx] && (
+                      <Button
+                        color={isEditMode === idx ? "primary" : "inherit"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditMode((prev) => (prev === idx ? -1 : idx));
+                        }}
+                      >
+                        {isEditMode === idx ? (
+                          <>
+                            <Typography variant="caption">취소하기</Typography>
+                            <ReplyIcon />
+                          </>
                         ) : (
-                          <TableCell align="right">{noteWhenWriting}</TableCell>
+                          <>
+                            <Typography variant="caption">수정하기</Typography>
+                            <ModeIcon />
+                          </>
                         )}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>포함되어야 할 내용</TableCell>
-                        {isEditMode ? (
-                          <TableCell align="right">
-                            <AccordionTextField
-                              onChange={(e) => {
-                                console.log(question);
-                                _setProposalSummary((prev) => ({
-                                  ...prev,
-                                  [question as string]: {
-                                    ...prev[question as any],
-                                    contentsToInclude: e.target.value,
-                                  },
-                                }));
-                              }}
-                              defaultValue={contentsToInclude}
-                              multiline
-                              rows={1}
-                            />
-                          </TableCell>
+                      </Button>
+                    )}
+                    {setContents && expanded[idx] && isEditMode === idx && (
+                      <Button
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setContents?.((prev) => ({ ...prev, [title]: _contents.title }));
+                          setIsEditMode(idx);
+                          update?.({ summaryId: summaryId!, summaries: _contents });
+                        }}
+                      >
+                        <Typography variant="caption">추가하기</Typography>
+                        <ModeIcon />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </AccordionSummary>
+              {isEditMode === idx ? (
+                <AccordionTextField
+                  defaultValue={content.join("\n")}
+                  multiline
+                  rows={3}
+                  onChange={(e) => {
+                    _setContents((prev) => ({ ...prev, [title]: e.target.value.split("\n") }));
+                  }}
+                />
+              ) : (
+                <div
+                  onClick={() => handleClickToCopy(content.map((c) => `- ${c}\n`).join(""))}
+                  style={{ cursor: "pointer" }}
+                >
+                  {content.map((c) => (
+                    <AccordionTypography>{`- ${c}`}</AccordionTypography>
+                  ))}
+                </div>
+              )}
+            </Accordion>
+          );
+        })}
+      {/* proposalSummary UI */}
+      {!!_proposalSummary &&
+        Object.entries(_proposalSummary).map((section, idx) => {
+          const { characterLimit, question, noteWhenWriting, contentsToInclude } = section[1];
+          return (
+            <Accordion expanded={expanded[idx] || false} onChange={handleChange(idx)}>
+              <AccordionSummary>
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      color: selected?.[idx] ? "text.primary" : "Gray",
+                      textDecoration: selected?.[idx] ? "none" : "line-through",
+                    }}
+                  >{`${idx + 1}. ${question}`}</Typography>
+                  <div>
+                    {setProposalSummary && expanded[idx] && (
+                      <Button
+                        color={isEditMode === idx ? "primary" : "inherit"}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsEditMode(idx);
+                        }}
+                      >
+                        {isEditMode === idx ? (
+                          <>
+                            <Typography variant="caption">취소하기</Typography>
+                            <ReplyIcon />
+                          </>
                         ) : (
-                          <TableCell align="right">{contentsToInclude}</TableCell>
+                          <>
+                            <Typography variant="caption">수정하기</Typography>
+                            <ModeIcon />
+                          </>
                         )}
-                      </TableRow>
-                      <TableRow>
-                        <TableCell>글자 수 제한</TableCell>
-                        {isEditMode ? (
-                          <TableCell align="right">
-                            <AccordionTextField
-                              type="number"
-                              onChange={(e) => {
-                                _setProposalSummary((prev) => ({
-                                  ...prev,
-                                  [question as string]: {
-                                    ...prev[question as any],
-                                    characterLimit: e.target.value,
-                                  },
-                                }));
-                              }}
-                              defaultValue={characterLimit}
-                              multiline
-                              rows={1}
-                            />
-                          </TableCell>
-                        ) : (
-                          <TableCell align="right">{characterLimit}</TableCell>
-                        )}
-                      </TableRow>
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </Accordion>
-            );
-          })}
-      </>
-    );
-  }
-;
+                      </Button>
+                    )}
+                    {setProposalSummary && expanded[idx] && isEditMode === idx && (
+                      <Button
+                        color="primary"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          console.log(_proposalSummary);
+                          // [Todo] 변경 사항 수정 후 전달하는 로직 구현 필요
+                          setProposalSummary?.((prev) => ({
+                            ...prev,
+                            [question as string]: { ..._proposalSummary },
+                          }));
+                          setIsEditMode(idx);
+                        }}
+                      >
+                        <Typography variant="caption">저장하기</Typography>
+                        <ModeIcon />
+                      </Button>
+                    )}
+                    {setSelected && selected && (
+                      <Checkbox
+                        checked={selected[idx]}
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => {
+                          e.stopPropagation();
+                          setSelected((prev) => {
+                            const temp = [...prev];
+                            temp[idx] = e.target.checked;
+                            return temp;
+                          });
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </AccordionSummary>
+              <TableContainer component={Paper}>
+                <Table sx={{ minWidth: 650 }} aria-label="simple table">
+                  <TableBody>
+                    <TableRow>
+                      <TableCell>작성시 주의사항</TableCell>
+                      {isEditMode === idx ? (
+                        <TableCell align="right">
+                          <AccordionTextField
+                            onChange={(e) => {
+                              _setProposalSummary((prev) => ({
+                                ...prev,
+                                [question as string]: {
+                                  ...prev[question as any],
+                                  noteWhenWriting: e.target.value,
+                                },
+                              }));
+                            }}
+                            defaultValue={noteWhenWriting}
+                            multiline
+                            rows={1}
+                          />
+                        </TableCell>
+                      ) : (
+                        <TableCell align="right">{noteWhenWriting}</TableCell>
+                      )}
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>포함되어야 할 내용</TableCell>
+                      {isEditMode === idx ? (
+                        <TableCell align="right">
+                          <AccordionTextField
+                            onChange={(e) => {
+                              console.log(question);
+                              _setProposalSummary((prev) => ({
+                                ...prev,
+                                [question as string]: {
+                                  ...prev[question as any],
+                                  contentsToInclude: e.target.value,
+                                },
+                              }));
+                            }}
+                            defaultValue={contentsToInclude}
+                            multiline
+                            rows={1}
+                          />
+                        </TableCell>
+                      ) : (
+                        <TableCell align="right">{contentsToInclude}</TableCell>
+                      )}
+                    </TableRow>
+                    <TableRow>
+                      <TableCell>글자 수 제한</TableCell>
+                      {isEditMode === idx ? (
+                        <TableCell align="right">
+                          <AccordionTextField
+                            type="number"
+                            onChange={(e) => {
+                              _setProposalSummary((prev) => ({
+                                ...prev,
+                                [question as string]: {
+                                  ...prev[question as any],
+                                  characterLimit: e.target.value,
+                                },
+                              }));
+                            }}
+                            defaultValue={characterLimit}
+                            multiline
+                            rows={1}
+                          />
+                        </TableCell>
+                      ) : (
+                        <TableCell align="right">{characterLimit}</TableCell>
+                      )}
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Accordion>
+          );
+        })}
+    </>
+  );
+};
 
 type PropsAccordionList = {
   contentList?: Content;

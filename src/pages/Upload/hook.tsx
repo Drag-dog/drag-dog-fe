@@ -353,7 +353,6 @@ export const useUpload = () => {
   };
 
   React.useLayoutEffect(() => {
-    // [Error] 토큰이 있는데 로그인 페이지로 이동하는 문제
     if (loginState === LOGIN_STATE.NOT_LOGGED_IN) {
       navigate("/sign-in");
     } else if (loginState === LOGIN_STATE.LOGGED_IN) {

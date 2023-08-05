@@ -16,6 +16,7 @@ export const ProposalList = ({
       {posts.map((post, i) => (
         <>
           <Button
+            key={post.id}
             sx={{
               width: "100%",
               borderBottom: `1px solid ${appColor.lightBlue1}`,
