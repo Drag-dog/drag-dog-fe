@@ -10,7 +10,7 @@ import { LoadingComponent } from "./Loading";
 
 export const Upload = () => {
   const {
-    posts,
+    proposalInfoList,
     isSelectedProposalList,
     onCheck,
     postSummarizePdf,
@@ -54,14 +54,14 @@ export const Upload = () => {
               (업로드한 사업 계획서를 클릭하시면 요약된 정보를 확인 가능합니다)
             </Typography>
             <Empty height="2rem" />
-            {posts.length === 0 ? (
+            {proposalInfoList.length === 0 ? (
               <div style={{ width: "100%" }}>
                 <Typography variant="body1">게시글이 없습니다.</Typography>
               </div>
             ) : (
               <>
                 <ProposalList
-                  posts={posts}
+                  posts={proposalInfoList}
                   onCheck={onCheck}
                   onDelete={onDelete}
                   onClick={getPropsalSummary}
@@ -144,7 +144,7 @@ export const Upload = () => {
                     accept="application/pdf"
                     onChange={(e) => {
                       if (!e.target.files?.[0]) return;
-                      const referenceFileIds = posts
+                      const referenceFileIds = proposalInfoList
                         .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
                         .filter((id) => id !== null) as string[];
 
