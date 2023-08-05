@@ -15,9 +15,9 @@ import { useModal } from "../../hooks/useModal";
 import Typography from "@mui/material/Typography/Typography";
 import { Empty } from "../../components/atoms";
 import { AccordionList } from "../../components/organisms/AccordionList";
-import { isEmpty } from "../../lib/utils/isEmpty";
 import { LOGIN_STATE } from "../../constants/enum";
 import { Button, TextField, RadioGroup, Radio, FormControlLabel } from "@mui/material";
+import { ProposalSummaryModal } from "./components/ProposalSummaryModal";
 
 interface ProposalInputType {
   proposalSummary: ResPostGenerateProposalSummary;
@@ -35,7 +35,7 @@ export const useUpload = () => {
   const { openAlert, Alert } = useAlert();
   const successAlert = useAlert();
   const { loginState } = useIsSignIn();
-  const [summary, setSummary] = React.useState<{ [key: string]: string[] }>({});
+  const [proposalSummary, setProposalSummary] = React.useState<ProposalSummary>({});
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
   const summaryModal = useModal();
@@ -59,7 +59,7 @@ export const useUpload = () => {
       return await proposalApi.postSummarizePdf({ accessToken, file });
     },
     onSuccess: (res) => {
-      setSummary(res);
+      setProposalSummary(res);
       summaryModal.handleOpen();
       mutGetProposalInfoList.mutate();
     },
@@ -74,13 +74,16 @@ export const useUpload = () => {
     onError: () => openAlert(),
   });
 
+  /**
+   * @description 요약된 사업계획서를 가져옴
+   */
   const mutGetPropsalSummary = useMutation({
     mutationFn: async (proposalKey: number) => {
       setOpenedSummaryId(String(proposalKey));
       return await proposalApi.getPropsalSummary({ accessToken, proposalKey });
     },
     onSuccess: (res) => {
-      setSummary(res.data);
+      setProposalSummary(res.data);
       summaryModal.handleOpen();
     },
   });
@@ -100,7 +103,9 @@ export const useUpload = () => {
     onError: () => openAlert(),
   });
 
-  const [proposalSummary, setProposalSummary] = React.useState<ResPostGenerateProposalSummary>({});
+  const [_proposalSummary, _setProposalSummary] = React.useState<ResPostGenerateProposalSummary>(
+    {}
+  );
   const selectBoxModal = useModal();
   const propsGenerateProposalSummary = React.useRef<{
     referenceFileIds: string[];
@@ -108,7 +113,7 @@ export const useUpload = () => {
   const mutPostGenerateProposalSummary = useMutation({
     mutationFn: async ({ pdf, referenceFileIds }: { pdf: File; referenceFileIds: string[] }) => {
       const proposalSummary = await proposalApi.postGenerateProposalSummary({ accessToken, pdf });
-      setProposalSummary(proposalSummary);
+      _setProposalSummary(proposalSummary);
       propsGenerateProposalSummary.current = { referenceFileIds };
     },
     onSuccess: () => selectBoxModal.handleOpen(),
@@ -156,40 +161,6 @@ export const useUpload = () => {
     });
   };
 
-  const SummaryModal = () => {
-    const [_summary, _setSummary] = React.useState<{ [key: string]: string[] }>(summary);
-    return (
-      <summaryModal.Modal>
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="h4">요약된 사업계획서</Typography>
-          <Empty height="0.5rem" />
-          <Typography variant="caption">(사업계획서의 내용도 수정가능합니다. )</Typography>
-        </div>
-        <Empty height="1rem" />
-        {!isEmpty(_summary) ? (
-          <AccordionList
-            contentList={_summary}
-            setContents={_setSummary}
-            update={mutPutProposals.mutate}
-            summaryId={openedSummaryId}
-          />
-        ) : (
-          <div style={{ width: "100%", textAlign: "center" }}>
-            <Typography>검색 결과가 없습니다.</Typography>
-          </div>
-        )}
-        <Empty height="1rem" />
-      </summaryModal.Modal>
-    );
-  };
-
   const onDelete = (proposalId: number) => {
     mutDeleteProposalSummary.mutate(proposalId);
   };
@@ -202,7 +173,7 @@ export const useUpload = () => {
   const SelectBoxModal = () => {
     const [answerType, setAnswerType] = React.useState<string>("descriptive");
     const [selected, setSelected] = React.useState<boolean[]>(
-      Object.entries(proposalSummary).map((x) => true)
+      Object.entries(_proposalSummary).map((x) => true)
     );
     return (
       <selectBoxModal.Modal>
@@ -220,10 +191,10 @@ export const useUpload = () => {
         </div>
         <Empty height="1rem" />
         <AccordionList
-          proposalSummary={proposalSummary}
+          proposalSummary={_proposalSummary}
           selected={selected}
           setSelected={setSelected}
-          // setProposalSummary={setProposalSummary}
+          // _setProposalSummary={_setProposalSummary}
         />
         <Empty height="1rem" />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -260,7 +231,7 @@ export const useUpload = () => {
               flexDirection: "column",
             }}
             onClick={(e) => {
-              const selectedSummary = Object.entries(proposalSummary).filter(
+              const selectedSummary = Object.entries(_proposalSummary).filter(
                 (_, idx) => selected[idx]
               );
               setSelectedSummary(selectedSummary.map((x) => x[1].question!));
@@ -397,7 +368,7 @@ export const useUpload = () => {
     selectedProposalList,
     onCheck,
     postSummarizePdf: mutSummaizePdf.mutate,
-    getPropsalSummary: mutGetPropsalSummary.mutate,
+    onClickProposalInfo: mutGetPropsalSummary.mutate,
     generateNewProposal: mutPostGenerateProposalSummary.mutate,
     generateProposalSummaryLoading:
       mutPostGenerateProposalSummary.isLoading ||
@@ -407,8 +378,17 @@ export const useUpload = () => {
     isSummaryLoading: mutSummaizePdf.isLoading,
     Alert,
     SuccessAlert,
-    SummaryModal,
     SelectBoxModal,
+    ProposalSummaryModal() {
+      return (
+        <ProposalSummaryModal
+          proposalSummary={proposalSummary}
+          Modal={summaryModal.Modal}
+          update={mutPutProposals.mutate}
+          openedSummaryId={openedSummaryId}
+        />
+      );
+    },
     UploadModal,
     openUploadModal: uploadModal.handleOpen,
   };
@@ -418,3 +398,5 @@ type FileInfoList = {
   id: number;
   name: string;
 }[];
+
+export type ProposalSummary = { [key: string]: string[] };

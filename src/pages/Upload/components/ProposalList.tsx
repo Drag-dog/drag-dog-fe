@@ -1,7 +1,7 @@
 import React from "react";
 import { List, ListItem, Button, Checkbox, Typography, IconButton } from "@mui/material";
-import { appColor } from "../../constants/appColor";
-import { Empty } from "../../components/atoms";
+import { appColor } from "../../../constants/appColor";
+import { Empty } from "../../../components/atoms";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export const ProposalList = ({
@@ -10,13 +10,7 @@ export const ProposalList = ({
   onClick,
   onDelete,
   isSelectedProposalList,
-}: {
-  posts: { id: number; name: string }[];
-  onCheck: ({ index, checked }: { index: number; checked: boolean }) => void;
-  onClick: (index: number) => void;
-  onDelete: (index: number) => void;
-  isSelectedProposalList: boolean[];
-}) => {
+}: PropsProposalList) => {
   return (
     <List sx={{ width: "100%" }}>
       {posts.map((post, i) => (
@@ -87,4 +81,12 @@ export const ProposalList = ({
       ))}
     </List>
   );
+};
+
+type PropsProposalList = {
+  posts: { id: number; name: string }[];
+  onCheck: ({ index, checked }: { index: number; checked: boolean }) => void;
+  onClick: (index: number) => void;
+  onDelete: (index: number) => void;
+  isSelectedProposalList: boolean[];
 };

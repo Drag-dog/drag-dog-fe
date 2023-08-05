@@ -4,7 +4,7 @@ import { Typography, Button } from "@mui/material";
 import { Empty } from "../../components/atoms";
 import { useUpload } from "./hook";
 import { useLoading } from "../../hooks/useLoading";
-import { ProposalList } from "./ProposalList";
+import { ProposalList } from "./components/ProposalList";
 import { sizes } from "../../constants/sizes";
 import { LoadingComponent } from "./Loading";
 
@@ -16,9 +16,9 @@ export const Upload = () => {
     postSummarizePdf,
     onDelete,
     isSummaryLoading,
-    getPropsalSummary,
+    onClickProposalInfo,
     Alert,
-    SummaryModal,
+    ProposalSummaryModal,
     generateNewProposal,
     generateProposalSummaryLoading,
     SuccessAlert,
@@ -40,7 +40,7 @@ export const Upload = () => {
         {isSummaryLoading && <Loading />}
         <Alert>오류가 발생했습니다.</Alert>
         <UploadModal />
-        <SummaryModal />
+        <ProposalSummaryModal />
         <SuccessAlert />
         <SelectBoxModal />
       </PageLayout.Absolute>
@@ -64,7 +64,7 @@ export const Upload = () => {
                   posts={proposalInfoList}
                   onCheck={onCheck}
                   onDelete={onDelete}
-                  onClick={getPropsalSummary}
+                  onClick={onClickProposalInfo}
                   isSelectedProposalList={selectedProposalList}
                 />
                 <Empty height="5rem" />
