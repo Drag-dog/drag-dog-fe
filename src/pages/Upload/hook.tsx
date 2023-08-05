@@ -24,14 +24,16 @@ interface ProposalInputType {
   answerType: string;
 }
 
+// [Todo] 시간날 때 FOUC 해결해보기
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
+  const [proposalInfoList, setProposalInfoList] = React.useState<FileInfoList>([]);
+  const [selectedProposalList, setSelectedProposalList] = React.useState<boolean[]>([]);
   const accessToken = useAtomValue(accessTokenAtom);
   const navigate = useNavigate();
   // [Todo] Alert 수정 필요
   const { openAlert, Alert } = useAlert();
   const successAlert = useAlert();
-  const [proposalInfoList, setProposalInfoList] = React.useState<FileInfoList>([]);
   const { loginState } = useIsSignIn();
   const [summary, setSummary] = React.useState<{ [key: string]: string[] }>({});
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
@@ -39,7 +41,6 @@ export const useUpload = () => {
   const summaryModal = useModal();
   const uploadModal = useModal(); // 단일 항목 업로드 모달
   const setSelectedSummary = useSetAtom(questionAtom);
-  const [isSelectedProposalList, setIsSelectedProposalList] = React.useState<boolean[]>([]);
 
   // [Todo] mutaion이 아닌 query로 변경 필요
   const mutGetProposalInfoList = useMutation({
@@ -48,7 +49,7 @@ export const useUpload = () => {
     },
     onSuccess: (res) => {
       setProposalInfoList(res.data);
-      setIsSelectedProposalList(Array(res.data.length).fill(true));
+      setSelectedProposalList(Array(res.data.length).fill(true));
     },
     onError: () => openAlert(),
   });
@@ -148,7 +149,7 @@ export const useUpload = () => {
   });
 
   const onCheck = ({ index, checked }: { index: number; checked: boolean }) => {
-    setIsSelectedProposalList((prev) => {
+    setSelectedProposalList((prev) => {
       const temp = [...prev];
       temp[index] = checked;
       return temp;
@@ -360,7 +361,7 @@ export const useUpload = () => {
               sx={{ width: "50%", height: "4rem" }}
               onClick={() => {
                 const referenceFileIds = proposalInfoList
-                  .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
+                  .map((post, i) => (selectedProposalList[i] ? String(post.id) : null))
                   .filter((id) => id !== null) as string[];
                 mutGenerateProposalByOneContents.mutate({
                   referenceFileIds,
@@ -393,7 +394,7 @@ export const useUpload = () => {
   // [Todo] 리팩터링 필요
   return {
     proposalInfoList,
-    isSelectedProposalList,
+    selectedProposalList,
     onCheck,
     postSummarizePdf: mutSummaizePdf.mutate,
     getPropsalSummary: mutGetPropsalSummary.mutate,

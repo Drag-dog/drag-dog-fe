@@ -11,7 +11,7 @@ import { LoadingComponent } from "./Loading";
 export const Upload = () => {
   const {
     proposalInfoList,
-    isSelectedProposalList,
+    selectedProposalList,
     onCheck,
     postSummarizePdf,
     onDelete,
@@ -65,7 +65,7 @@ export const Upload = () => {
                   onCheck={onCheck}
                   onDelete={onDelete}
                   onClick={getPropsalSummary}
-                  isSelectedProposalList={isSelectedProposalList}
+                  isSelectedProposalList={selectedProposalList}
                 />
                 <Empty height="5rem" />
               </>
@@ -145,7 +145,7 @@ export const Upload = () => {
                     onChange={(e) => {
                       if (!e.target.files?.[0]) return;
                       const referenceFileIds = proposalInfoList
-                        .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
+                        .map((post, i) => (selectedProposalList[i] ? String(post.id) : null))
                         .filter((id) => id !== null) as string[];
 
                       generateNewProposal({
