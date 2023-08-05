@@ -4,8 +4,8 @@ import { Empty } from "../../../components/atoms";
 import { AccordionList } from "../../../components/organisms/AccordionList";
 import { isEmpty } from "../../../lib/utils/isEmpty";
 import { UseMutateFunction } from "react-query";
-import { ContentList } from "../../../components/organisms/AccordionList";
-import { ProposalSummary } from "../../../apis/proposal";
+import { ProposalSummaryObj } from "../../../apis/proposal";
+import { ProposalSummaryList } from "../proxys/ProposalSummary.proxy";
 
 export const ProposalSummaryModal = ({
   proposalSummaryList,
@@ -13,7 +13,8 @@ export const ProposalSummaryModal = ({
   update,
   openedSummaryId,
 }: PropsProposalSummaryModal) => {
-  const [_proposalSummary, _setProposalSummary] = React.useState<ContentList>(proposalSummaryList);
+  const [_proposalSummary, _setProposalSummary] =
+    React.useState<ProposalSummaryList>(proposalSummaryList);
   return (
     <Modal>
       <div
@@ -47,14 +48,14 @@ export const ProposalSummaryModal = ({
 };
 
 type PropsProposalSummaryModal = {
-  proposalSummaryList: ContentList;
+  proposalSummaryList: ProposalSummaryList;
   Modal: ({ children }: { children: React.ReactNode }) => JSX.Element;
   update: UseMutateFunction<
     any,
     unknown,
     {
       summaryId: string;
-      summaries: ProposalSummary;
+      summaries: ProposalSummaryObj;
     },
     unknown
   >;

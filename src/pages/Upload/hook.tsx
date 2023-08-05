@@ -4,7 +4,7 @@ import { useMutation } from "react-query";
 import { useIsSignIn } from "../../hooks/useIsSignIn";
 
 import {
-  ProposalSummary,
+  ProposalSummaryObj,
   PropsPostAnswerProposal,
   ResPostGenerateProposalSummary,
   proposalApi,
@@ -15,11 +15,12 @@ import { useAlert } from "../../hooks/useAlert";
 import { useModal } from "../../hooks/useModal";
 import Typography from "@mui/material/Typography/Typography";
 import { Empty } from "../../components/atoms";
-import { AccordionList, ContentList } from "../../components/organisms/AccordionList";
+import { AccordionList } from "../../components/organisms/AccordionList";
 import { LOGIN_STATE } from "../../constants/enum";
 import { Button, TextField, RadioGroup, Radio, FormControlLabel } from "@mui/material";
 import { ProposalSummaryModal } from "./components/ProposalSummaryModal";
 import { ProposalSummaryProxy } from "./proxys/ProposalSummary.proxy";
+import { ProposalSummaryList } from "./proxys/ProposalSummary.proxy";
 
 interface ProposalInputType {
   proposalSummary: ResPostGenerateProposalSummary;
@@ -37,7 +38,7 @@ export const useUpload = () => {
   const { openAlert, Alert } = useAlert();
   const successAlert = useAlert();
   const { loginState } = useIsSignIn();
-  const [proposalSummaryList, setProposalSummaryList] = React.useState<ContentList>([]);
+  const [proposalSummaryList, setProposalSummaryList] = React.useState<ProposalSummaryList>([]);
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
   const summaryModal = useModal();
@@ -97,7 +98,7 @@ export const useUpload = () => {
       summaries,
     }: {
       summaryId: string;
-      summaries: ProposalSummary;
+      summaries: ProposalSummaryObj;
     }) => {
       return await proposalApi.putProposalSummary({
         accessToken,

@@ -132,7 +132,7 @@ const getPropsalSummary = async ({
 }: {
   accessToken: string;
   proposalKey: number;
-}): Promise<{ data: ProposalSummary }> => {
+}): Promise<{ data: ProposalSummaryObj }> => {
   const response = await proposalInstance.get(`${ROUTE}/summary/${proposalKey}`, {
     ...authorizationHeader(accessToken),
   });
@@ -184,10 +184,10 @@ export type ResPostGenerateProposalSummary = {
   };
 };
 
-export type ProposalSummary = { [key: string]: string[] };
+export type ProposalSummaryObj = { [key: string]: string[] };
 
 type PropsPutProposalSummary = {
   accessToken: string;
   summaryId: string;
-  summaries: ProposalSummary;
+  summaries: ProposalSummaryObj;
 };

@@ -10,14 +10,17 @@ import Button from "@mui/material/Button";
 import ReplyIcon from "@mui/icons-material/Reply";
 import { UseMutateFunction } from "react-query";
 import Checkbox from "@mui/material/Checkbox";
-import { ProposalSummary, ResPostGenerateProposalSummary } from "../../apis/proposal";
+import { ProposalSummaryObj, ResPostGenerateProposalSummary } from "../../apis/proposal";
 import TableContainer from "@mui/material/TableContainer";
 import Table from "@mui/material/Table";
 import TableRow from "@mui/material/TableRow";
 import TableCell from "@mui/material/TableCell";
 import TableBody from "@mui/material/TableBody";
 import Paper from "@mui/material/Paper";
-import { ProposalSummaryProxy } from "../../pages/Upload/proxys/ProposalSummary.proxy";
+import {
+  ProposalSummaryList,
+  ProposalSummaryProxy,
+} from "../../pages/Upload/proxys/ProposalSummary.proxy";
 
 export const Accordion = styled((props: AccordionProps) => (
   <MuiAccordion disableGutters elevation={0} square {...props} />
@@ -74,7 +77,7 @@ export const AccordionList = ({
    * @description 수정 모드인 index를 저장. 수정 모드가 없을 경우, -1
    */
   const [isEditMode, setIsEditMode] = React.useState<number>(-1);
-  const [_contents, _setProposalSummaryList] = React.useState<ContentList>(
+  const [_contents, _setProposalSummaryList] = React.useState<ProposalSummaryList>(
     !!contentList ? contentList : []
   );
   const [_proposalSummary, _setProposalSummary] = React.useState(
@@ -353,13 +356,13 @@ export const AccordionList = ({
 };
 
 type PropsAccordionList = {
-  contentList?: ContentList;
+  contentList?: ProposalSummaryList;
   proposalSummary?: ResPostGenerateProposalSummary;
-  setProposalSummaryList?: React.Dispatch<React.SetStateAction<ContentList>>;
+  setProposalSummaryList?: React.Dispatch<React.SetStateAction<ProposalSummaryList>>;
   update?: UseMutateFunction<
     any,
     unknown,
-    { summaryId: string; summaries: ProposalSummary },
+    { summaryId: string; summaries: ProposalSummaryObj },
     unknown
   >;
   summaryId?: string;
@@ -368,5 +371,3 @@ type PropsAccordionList = {
   setSelected?: React.Dispatch<React.SetStateAction<boolean[]>>;
   setProposalSummary?: React.Dispatch<React.SetStateAction<ResPostGenerateProposalSummary>>;
 };
-
-export type ContentList = { title: string; content: string[] }[];
