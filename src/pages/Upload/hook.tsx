@@ -61,8 +61,10 @@ export const useUpload = () => {
     mutationFn: async (file: File) => {
       return await proposalApi.postSummarizePdf({ accessToken, file });
     },
-    onSuccess: async (res) => {
-      setProposalSummaryList(res);
+    onSuccess: (res) => {
+      // setProposalSummaryList(ProposalSummaryProxy.toFE(res)); // [Error] 이 코드는 왜 안될까...
+      const proposalSummaryProxy = ProposalSummaryProxy.toFE(res);
+      setProposalSummaryList(proposalSummaryProxy);
       mutGetProposalInfoList.mutate();
       summaryModal.handleOpen();
     },
