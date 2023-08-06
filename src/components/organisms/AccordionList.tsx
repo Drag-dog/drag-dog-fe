@@ -91,7 +91,7 @@ export const AccordionList = ({
     } else if (contentList) {
       setExpanded(Array(Object.keys(contentList || {}).length).fill(true));
     }
-  }, [contentList, selected]);
+  }, [contentList]);
 
   const handleChange =
     (panelIdx: number) => (event: React.SyntheticEvent, newExpanded: boolean) => {
