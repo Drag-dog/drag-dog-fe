@@ -4,21 +4,21 @@ import { Typography, Button } from "@mui/material";
 import { Empty } from "../../components/atoms";
 import { useUpload } from "./hook";
 import { useLoading } from "../../hooks/useLoading";
-import { ProposalList } from "./ProposalList";
+import { ProposalList } from "./components/ProposalList";
 import { sizes } from "../../constants/sizes";
 import { LoadingComponent } from "./Loading";
 
 export const Upload = () => {
   const {
-    posts,
-    isSelectedProposalList,
+    proposalInfoList,
+    selectedProposalList,
     onCheck,
     postSummarizePdf,
     onDelete,
     isSummaryLoading,
-    getPropsalSummary,
+    onClickProposalInfo,
     Alert,
-    SummaryModal,
+    ProposalSummaryModal,
     generateNewProposal,
     generateProposalSummaryLoading,
     SuccessAlert,
@@ -40,7 +40,7 @@ export const Upload = () => {
         {isSummaryLoading && <Loading />}
         <Alert>오류가 발생했습니다.</Alert>
         <UploadModal />
-        <SummaryModal />
+        <ProposalSummaryModal />
         <SuccessAlert />
         <SelectBoxModal />
       </PageLayout.Absolute>
@@ -54,18 +54,18 @@ export const Upload = () => {
               (업로드한 사업 계획서를 클릭하시면 요약된 정보를 확인 가능합니다)
             </Typography>
             <Empty height="2rem" />
-            {posts.length === 0 ? (
+            {proposalInfoList.length === 0 ? (
               <div style={{ width: "100%" }}>
                 <Typography variant="body1">게시글이 없습니다.</Typography>
               </div>
             ) : (
               <>
                 <ProposalList
-                  posts={posts}
+                  posts={proposalInfoList}
                   onCheck={onCheck}
                   onDelete={onDelete}
-                  onClick={getPropsalSummary}
-                  isSelectedProposalList={isSelectedProposalList}
+                  onClick={onClickProposalInfo}
+                  isSelectedProposalList={selectedProposalList}
                 />
                 <Empty height="5rem" />
               </>
@@ -144,8 +144,8 @@ export const Upload = () => {
                     accept="application/pdf"
                     onChange={(e) => {
                       if (!e.target.files?.[0]) return;
-                      const referenceFileIds = posts
-                        .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
+                      const referenceFileIds = proposalInfoList
+                        .map((post, i) => (selectedProposalList[i] ? String(post.id) : null))
                         .filter((id) => id !== null) as string[];
 
                       generateNewProposal({

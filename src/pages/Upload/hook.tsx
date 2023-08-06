@@ -4,6 +4,7 @@ import { useMutation } from "react-query";
 import { useIsSignIn } from "../../hooks/useIsSignIn";
 
 import {
+  ProposalSummaryObj,
   PropsPostAnswerProposal,
   ResPostGenerateProposalSummary,
   proposalApi,
@@ -15,25 +16,29 @@ import { useModal } from "../../hooks/useModal";
 import Typography from "@mui/material/Typography/Typography";
 import { Empty } from "../../components/atoms";
 import { AccordionList } from "../../components/organisms/AccordionList";
-import { isEmpty } from "../../lib/utils/isEmpty";
 import { LOGIN_STATE } from "../../constants/enum";
 import { Button, TextField, RadioGroup, Radio, FormControlLabel } from "@mui/material";
+import { ProposalSummaryModal } from "./components/ProposalSummaryModal";
+import { ProposalSummaryProxy } from "./proxys/ProposalSummary.proxy";
+import { ProposalSummaryList } from "./proxys/ProposalSummary.proxy";
 
 interface ProposalInputType {
   proposalSummary: ResPostGenerateProposalSummary;
-  answerType: string
+  answerType: string;
 }
 
+// [Todo] 시간날 때 FOUC 해결해보기
 // [Todo] 리펙터링 필요
 export const useUpload = () => {
+  const [proposalInfoList, setProposalInfoList] = React.useState<FileInfoList>([]);
+  const [selectedProposalList, setSelectedProposalList] = React.useState<boolean[]>([]);
   const accessToken = useAtomValue(accessTokenAtom);
   const navigate = useNavigate();
   // [Todo] Alert 수정 필요
   const { openAlert, Alert } = useAlert();
   const successAlert = useAlert();
-  const [posts, setPosts] = React.useState<{ id: number; name: string }[]>([]);
   const { loginState } = useIsSignIn();
-  const [summary, setSummary] = React.useState<{ [key: string]: string[] }>({});
+  const [proposalSummaryList, setProposalSummaryList] = React.useState<ProposalSummaryList>([]);
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
   const summaryModal = useModal();
@@ -41,13 +46,13 @@ export const useUpload = () => {
   const setSelectedSummary = useSetAtom(questionAtom);
 
   // [Todo] mutaion이 아닌 query로 변경 필요
-  const mutGetFileInfoList = useMutation({
+  const mutGetProposalInfoList = useMutation({
     mutationFn: async () => {
       return await proposalApi.getProposalInfoList({ accessToken });
     },
     onSuccess: (res) => {
-      setPosts(res.data);
-      setIsSelectedProposalList(Array(res.data.length).fill(true));
+      setProposalInfoList(res.data);
+      setSelectedProposalList(Array(res.data.length).fill(true));
     },
     onError: () => openAlert(),
   });
@@ -57,9 +62,11 @@ export const useUpload = () => {
       return await proposalApi.postSummarizePdf({ accessToken, file });
     },
     onSuccess: (res) => {
-      setSummary(res)
+      // setProposalSummaryList(ProposalSummaryProxy.toFE(res)); // [Error] 이 코드는 왜 안될까...
+      const proposalSummaryProxy = ProposalSummaryProxy.toFE(res);
+      setProposalSummaryList(proposalSummaryProxy);
+      mutGetProposalInfoList.mutate();
       summaryModal.handleOpen();
-      mutGetFileInfoList.mutate();
     },
     onError: () => openAlert(),
   });
@@ -68,37 +75,54 @@ export const useUpload = () => {
     mutationFn: async (proposalKey: number) => {
       await proposalApi.deleteProposalSummary({ accessToken, proposalKey });
     },
-    onSuccess: () => mutGetFileInfoList.mutate(),
+    onSuccess: () => mutGetProposalInfoList.mutate(),
     onError: () => openAlert(),
   });
 
+  /**
+   * @description 요약된 사업계획서를 가져옴
+   */
   const mutGetPropsalSummary = useMutation({
     mutationFn: async (proposalKey: number) => {
       setOpenedSummaryId(String(proposalKey));
       return await proposalApi.getPropsalSummary({ accessToken, proposalKey });
     },
     onSuccess: (res) => {
-      setSummary(res.data);
+      setProposalSummaryList(ProposalSummaryProxy.toFE(res.data));
       summaryModal.handleOpen();
     },
   });
 
-  const mutPutProposals = useMutation({
-    mutationFn: async ({ summaryId, summaries }: { summaryId: string; summaries: object }) => {
+  // [Error] '수정하기' 실행 시, 알 수 없는 리렌더링이 뒤늦게 발생함
+  const mutEditProposalSummary = useMutation({
+    mutationFn: async ({
+      summaryId,
+      summaries,
+    }: {
+      summaryId: string;
+      summaries: ProposalSummaryObj;
+    }) => {
       return await proposalApi.putProposalSummary({
         accessToken,
         summaryId,
         summaries,
       });
     },
-    onSuccess: () => {
-      mutGetPropsalSummary.mutate(Number(openedSummaryId));
+    onSuccess: async () => {
+      const res = await proposalApi.getPropsalSummary({
+        accessToken,
+        proposalKey: Number(openedSummaryId),
+      });
+      setProposalSummaryList(ProposalSummaryProxy.toFE(res.data));
       successAlert.openAlert();
     },
-    onError: () => openAlert(),
+    onError: () => {
+      openAlert();
+    },
   });
 
-  const [proposalSummary, setProposalSummary] = React.useState<ResPostGenerateProposalSummary>({});
+  const [_proposalSummary, _setProposalSummaryList] =
+    React.useState<ResPostGenerateProposalSummary>({});
   const selectBoxModal = useModal();
   const propsGenerateProposalSummary = React.useRef<{
     referenceFileIds: string[];
@@ -106,36 +130,34 @@ export const useUpload = () => {
   const mutPostGenerateProposalSummary = useMutation({
     mutationFn: async ({ pdf, referenceFileIds }: { pdf: File; referenceFileIds: string[] }) => {
       const proposalSummary = await proposalApi.postGenerateProposalSummary({ accessToken, pdf });
-      setProposalSummary(proposalSummary);
+      _setProposalSummaryList(proposalSummary);
       propsGenerateProposalSummary.current = { referenceFileIds };
     },
     onSuccess: () => selectBoxModal.handleOpen(),
   });
 
   const mutPostAnswerProposal = useMutation({
-      mutationFn: async (input: ProposalInputType) => {
-        const { proposalSummary, answerType } = input;
-        const result = await Promise.all(
-          Object.entries(proposalSummary).map(async ([key, props]) => {
-            try {
-              return await proposalApi.postAnswerProposal({
-                accessToken,
-                referenceFileIds: propsGenerateProposalSummary.current.referenceFileIds,
-                answerType,
-                ...props,
-              });
-            } catch (e) {
-              console.log(e)
-              return '다시한번 시도해주세요'
-            }
-          })
-        );
-        setResProposal(result);
-
-      },
-      onSuccess: () => navigate("/success"),
-    }
-  );
+    mutationFn: async (input: ProposalInputType) => {
+      const { proposalSummary, answerType } = input;
+      const result = await Promise.all(
+        Object.entries(proposalSummary).map(async ([key, props]) => {
+          try {
+            return await proposalApi.postAnswerProposal({
+              accessToken,
+              referenceFileIds: propsGenerateProposalSummary.current.referenceFileIds,
+              answerType,
+              ...props,
+            });
+          } catch (e) {
+            console.log(e);
+            return "다시한번 시도해주세요";
+          }
+        })
+      );
+      setResProposal(result);
+    },
+    onSuccess: () => navigate("/success"),
+  });
 
   const mutGenerateProposalByOneContents = useMutation({
     mutationFn: async ({ ...props }: Omit<PropsPostAnswerProposal, "accessToken">) => {
@@ -148,48 +170,12 @@ export const useUpload = () => {
     },
   });
 
-  const [isSelectedProposalList, setIsSelectedProposalList] = React.useState<boolean[]>([]);
-
   const onCheck = ({ index, checked }: { index: number; checked: boolean }) => {
-    setIsSelectedProposalList((prev) => {
+    setSelectedProposalList((prev) => {
       const temp = [...prev];
       temp[index] = checked;
       return temp;
     });
-  };
-
-  const SummaryModal = () => {
-    const [_summary, _setSummary] = React.useState<{ [key: string]: string[] }>(summary);
-    return (
-      <summaryModal.Modal>
-        <div
-          style={{
-            width: "100%",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          <Typography variant="h4">요약된 사업계획서</Typography>
-          <Empty height="0.5rem" />
-          <Typography variant="caption">(사업계획서의 내용도 수정가능합니다. )</Typography>
-        </div>
-        <Empty height="1rem" />
-        {!isEmpty(_summary) ? (
-          <AccordionList
-            contentList={_summary}
-            setContents={_setSummary}
-            update={mutPutProposals.mutate}
-            summaryId={openedSummaryId}
-          />
-        ) : (
-          <div style={{ width: "100%", textAlign: "center" }}>
-            <Typography>검색 결과가 없습니다.</Typography>
-          </div>
-        )}
-        <Empty height="1rem" />
-      </summaryModal.Modal>
-    );
   };
 
   const onDelete = (proposalId: number) => {
@@ -204,7 +190,7 @@ export const useUpload = () => {
   const SelectBoxModal = () => {
     const [answerType, setAnswerType] = React.useState<string>("descriptive");
     const [selected, setSelected] = React.useState<boolean[]>(
-      Object.entries(proposalSummary).map((x) => true)
+      Object.entries(_proposalSummary).map((x) => true)
     );
     return (
       <selectBoxModal.Modal>
@@ -222,10 +208,10 @@ export const useUpload = () => {
         </div>
         <Empty height="1rem" />
         <AccordionList
-          proposalSummary={proposalSummary}
+          proposalSummary={_proposalSummary}
           selected={selected}
           setSelected={setSelected}
-          // setProposalSummary={setProposalSummary}
+          // _setProposalSummaryList={_setProposalSummaryList}
         />
         <Empty height="1rem" />
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -235,7 +221,11 @@ export const useUpload = () => {
               (서술형이면 자세히, 요약형이면 간단히 출력이 됩니다.)
             </Typography>
           </div>
-          <RadioGroup row onChange={(e) => setAnswerType(e.target.value)} defaultValue={'descriptive'}>
+          <RadioGroup
+            row
+            onChange={(e) => setAnswerType(e.target.value)}
+            defaultValue={"descriptive"}
+          >
             <FormControlLabel value="descriptive" control={<Radio size="small" />} label="서술형" />
             <FormControlLabel value="summary" control={<Radio size="small" />} label="요약형" />
           </RadioGroup>
@@ -258,13 +248,13 @@ export const useUpload = () => {
               flexDirection: "column",
             }}
             onClick={(e) => {
-              const selectedSummary = Object.entries(proposalSummary).filter(
+              const selectedSummary = Object.entries(_proposalSummary).filter(
                 (_, idx) => selected[idx]
               );
               setSelectedSummary(selectedSummary.map((x) => x[1].question!));
               mutPostAnswerProposal.mutate({
                 answerType,
-                proposalSummary: Object.fromEntries(selectedSummary)
+                proposalSummary: Object.fromEntries(selectedSummary),
               });
               selectBoxModal.handleClose();
             }}
@@ -339,8 +329,16 @@ export const useUpload = () => {
                 (서술형이면 자세히, 요약형이면 간단히 출력이 됩니다.)
               </Typography>
             </div>
-            <RadioGroup row onChange={(e) => setAnswerType(e.target.value)} defaultValue={'descriptive'}>
-              <FormControlLabel value="descriptive" control={<Radio size="small" />} label="서술형" />
+            <RadioGroup
+              row
+              onChange={(e) => setAnswerType(e.target.value)}
+              defaultValue={"descriptive"}
+            >
+              <FormControlLabel
+                value="descriptive"
+                control={<Radio size="small" />}
+                label="서술형"
+              />
               <FormControlLabel value="summary" control={<Radio size="small" />} label="요약형" />
             </RadioGroup>
           </div>
@@ -350,9 +348,9 @@ export const useUpload = () => {
               variant="contained"
               sx={{ width: "50%", height: "4rem" }}
               onClick={() => {
-                const referenceFileIds = posts
-                .map((post, i) => (isSelectedProposalList[i] ? String(post.id) : null))
-                .filter((id) => id !== null) as string[];
+                const referenceFileIds = proposalInfoList
+                  .map((post, i) => (selectedProposalList[i] ? String(post.id) : null))
+                  .filter((id) => id !== null) as string[];
                 mutGenerateProposalByOneContents.mutate({
                   referenceFileIds,
                   question,
@@ -372,22 +370,21 @@ export const useUpload = () => {
   };
 
   React.useLayoutEffect(() => {
-    // [Error] 토큰이 있는데 로그인 페이지로 이동하는 문제
     if (loginState === LOGIN_STATE.NOT_LOGGED_IN) {
       navigate("/sign-in");
     } else if (loginState === LOGIN_STATE.LOGGED_IN) {
-      mutGetFileInfoList.mutate();
+      mutGetProposalInfoList.mutate();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loginState]);
 
   // [Todo] 리팩터링 필요
   return {
-    posts,
-    isSelectedProposalList,
+    proposalInfoList,
+    selectedProposalList,
     onCheck,
     postSummarizePdf: mutSummaizePdf.mutate,
-    getPropsalSummary: mutGetPropsalSummary.mutate,
+    onClickProposalInfo: mutGetPropsalSummary.mutate,
     generateNewProposal: mutPostGenerateProposalSummary.mutate,
     generateProposalSummaryLoading:
       mutPostGenerateProposalSummary.isLoading ||
@@ -397,9 +394,23 @@ export const useUpload = () => {
     isSummaryLoading: mutSummaizePdf.isLoading,
     Alert,
     SuccessAlert,
-    SummaryModal,
     SelectBoxModal,
+    ProposalSummaryModal() {
+      return (
+        <ProposalSummaryModal
+          proposalSummaryList={proposalSummaryList}
+          Modal={summaryModal.Modal}
+          update={mutEditProposalSummary.mutate}
+          openedSummaryId={openedSummaryId}
+        />
+      );
+    },
     UploadModal,
     openUploadModal: uploadModal.handleOpen,
   };
 };
+
+type FileInfoList = {
+  id: number;
+  name: string;
+}[];
