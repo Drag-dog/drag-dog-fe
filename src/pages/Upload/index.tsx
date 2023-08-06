@@ -95,7 +95,7 @@ export const Upload = () => {
                 <input
                   style={{ display: "none" }}
                   type="file"
-                  accept="application/pdf"
+                  accept="application/pdf,.docx"
                   onChange={(e) => {
                     if (!e.target.files?.[0]) return;
                     postSummarizePdf(e.target.files[0]);
@@ -141,7 +141,7 @@ export const Upload = () => {
                   <input
                     style={{ display: "none" }}
                     type="file"
-                    accept="application/pdf"
+                    accept="application/pdf,.docx"
                     onChange={(e) => {
                       if (!e.target.files?.[0]) return;
                       const referenceFileIds = proposalInfoList
