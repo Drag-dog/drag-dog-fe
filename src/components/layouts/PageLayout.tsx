@@ -16,6 +16,7 @@ const Layout = styled("div")({
 
 type Props = { children?: React.ReactNode };
 
+// [Todo] useSignIn을 여기서 호출하면 좋을 것 같음
 const Main = ({ children }: Props) => {
   const [TitleComponenets] = getChildrenByName(children, "Title");
   const [SubTitleComponenets] = getChildrenByName(children, "SubTitle");
