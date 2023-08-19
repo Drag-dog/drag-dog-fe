@@ -9,7 +9,6 @@ import { appColor } from "../../constants/appColor";
 export const Success = () => {
   const resProposal = useAtomValue(resProposalsAtom);
   const question = useAtomValue(questionAtom);
-  console.log(resProposal);
   return (
     <PageLayout>
       <PageLayout.Title />
