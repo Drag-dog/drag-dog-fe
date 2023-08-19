@@ -28,7 +28,6 @@ export const Upload = () => {
   } = useUpload();
   const { Loading } = useLoading();
 
-  // [Todo] 4103 invalid token 에러 처리
   // [Todo] 스르륵 올라오는 애니메이션 추가
   return (
     <PageLayout>

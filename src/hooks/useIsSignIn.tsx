@@ -1,17 +1,21 @@
 import React from "react";
 import { accessTokenAtom } from "../store/atoms";
 import { useAtomValue } from "jotai";
-import { LOGIN_STATE } from "../constants/enum";
 import { userApi } from "../apis/user";
+import { LOGIN_STATE } from "../constants/enum";
 
+/**
+ * @description 로그인 상태를 확인하는 커스텀 훅
+ */
 export const useIsSignIn = () => {
   const accessToken = useAtomValue(accessTokenAtom);
   const [loginState, setLoginState] = React.useState<LOGIN_STATE>(LOGIN_STATE.UNKNOWN);
+
   React.useLayoutEffect(() => {
-    if (accessToken === LOGIN_STATE.UNKNOWN) return;
-    else {
+    if (accessToken === "") {
+      setLoginState(LOGIN_STATE.UNKNOWN);
+    } else {
       userApi.getIsSignIn(accessToken).then(({ data }) => {
-        console.log(data);
         switch (data?.isLoggedIn) {
           case true:
             setLoginState(LOGIN_STATE.LOGGED_IN);
@@ -23,7 +27,6 @@ export const useIsSignIn = () => {
         }
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [accessToken]);
   return { loginState };
 };
