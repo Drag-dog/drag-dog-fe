@@ -127,7 +127,12 @@ export const MainHeader = () => {
       <Title />
 
       <Stack direction="row" spacing={2} sx={{ marginLeft: 2, flexGrow: 1, justifyContent: "end" }}>
-        <Button onClick={() => contentsSearchModal.handleOpen()} size="small">
+        <Button onClick={() => {
+          contentsSearchModal.handleOpen()
+          proposalApi.getSearchContents({ accessToken, query: "" }).then((res) => {
+            setContents(ProposalSummaryProxy.toFE(res.data));
+          });
+        }} size="small">
           <Typography color="GrayText" fontSize="12px">
             기존 항목 검색
           </Typography>
