@@ -103,58 +103,37 @@ export const Upload = () => {
                   }}
                 />
               </Button>
-              <div
-                style={{
-                  display: "flex",
+
+              <Button
+                variant="contained"
+                component="label"
+                sx={{
                   width: "50%",
+                  height: "4rem",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
-                <Button
-                  variant="contained"
-                  component="label"
-                  sx={{
-                    width: "50%",
-                    height: "4rem",
-                    display: "flex",
-                    flexDirection: "column",
+                <Typography>⭐ AI 사업 계획서 초안 작성하기</Typography>
+                <Typography variant="caption">
+                  (새 양식에 맞게 사업 계획서를 작성합니다.)
+                </Typography>
+                <input
+                  style={{ display: "none" }}
+                  type="file"
+                  accept="application/pdf,.docx"
+                  onChange={(e) => {
+                    if (!e.target.files?.[0]) return;
+                    const referenceFileIds = proposalInfoList
+                    .map((post, i) => (selectedProposalList[i] ? String(post.id) : null))
+                    .filter((id) => id !== null) as string[];
+                    generateNewProposal({
+                      pdf: e.target.files[0],
+                      referenceFileIds,
+                    });
                   }}
-                  onClick={openUploadModal}
-                >
-                  <Typography>단일 항목 작성하기</Typography>
-                </Button>
-                <Empty width="1rem" />
-                <Button
-                  variant="contained"
-                  component="label"
-                  sx={{
-                    width: "50%",
-                    height: "4rem",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <Typography>⭐ AI 사업 계획서 작성하기</Typography>
-                  <Typography variant="caption">
-                    (새 양식에 맞게 사업 계획서를 작성합니다.)
-                  </Typography>
-                  <input
-                    style={{ display: "none" }}
-                    type="file"
-                    accept="application/pdf,.docx"
-                    onChange={(e) => {
-                      if (!e.target.files?.[0]) return;
-                      const referenceFileIds = proposalInfoList
-                        .map((post, i) => (selectedProposalList[i] ? String(post.id) : null))
-                        .filter((id) => id !== null) as string[];
-
-                      generateNewProposal({
-                        pdf: e.target.files[0],
-                        referenceFileIds,
-                      });
-                    }}
-                  />
-                </Button>
-              </div>
+                />
+              </Button>
             </div>
           </>
         )}
