@@ -6,8 +6,7 @@ import { createControlledReg } from "../../../lib/utils/createControlledReg";
 import { useMutation } from "react-query";
 import { PropsSign, userApi } from "../../../apis/user";
 import { useAlert } from "../../../hooks/useAlert";
-import { useSetAtom } from "jotai";
-import { accessTokenAtom } from "../../../store/atoms";
+import { useLoginState } from "../../../hooks/useLoginState";
 
 const ID = "id";
 const PW = "password";
@@ -18,13 +17,13 @@ export const useSignIn = () => {
   const [isChecked, setIsChecked] = React.useState(false);
   const createReg = createControlledReg(control);
   const { openAlert, Alert } = useAlert();
-  const setAccessToken = useSetAtom(accessTokenAtom);
+  const { setLoginStateSignIn } = useLoginState();
   const mutation = useMutation({
     mutationFn: async ({ email, password }: PropsSign) => {
       return await userApi.signIn({ email, password });
     },
     onSuccess: (res) => {
-      setAccessToken(res.data.accessToken);
+      setLoginStateSignIn(res.data.accessToken);
       navigate("/upload");
     },
     onError: () => {

@@ -7,7 +7,7 @@ import { LOGIN_STATE } from "../constants/enum";
 
 /**
  * @description 엑세스 토큰을 이용해 로그안 상태를 설정하는 커스텀 훅
- * MainLayout 컴포넌트에서 사용
+ * MainLayout 컴포넌트에서만 사용함으로써 불필요한 api 호출을 막음
  */
 export const useSetLoginState = () => {
   const accessToken = useAtomValue(accessTokenAtom);
