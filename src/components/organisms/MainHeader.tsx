@@ -2,9 +2,9 @@ import React from "react";
 import { Toolbar, Stack, Button, Typography } from "@mui/material";
 import { Title } from "../molecules/Title";
 import PortraitIcon from "@mui/icons-material/Portrait";
-import { useIsSignIn } from "../../hooks/useIsSignIn";
+import { useLoginState } from "../../hooks/useLoginState";
 import { useNavigate } from "react-router-dom";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue } from "jotai";
 import { accessTokenAtom } from "../../store/atoms";
 import { LOGIN_STATE } from "../../constants/enum";
 import { useModal } from "../../hooks/useModal";
@@ -24,11 +24,10 @@ import {
 
 export const MainHeader = () => {
   const { openAlert, Alert } = useAlert();
-  const { loginState } = useIsSignIn();
+  const { loginState, setLoginStateSignOut } = useLoginState();
   const accessToken = useAtomValue(accessTokenAtom);
   const navigate = useNavigate();
   const [contents, setContents] = React.useState<ProposalSummaryList>([]);
-  const setAccessToken = useSetAtom(accessTokenAtom);
 
   const mutSearchContents = useMutation({
     mutationFn: async (query: string) => {
@@ -154,7 +153,7 @@ export const MainHeader = () => {
         {loginState === LOGIN_STATE.LOGGED_IN ? (
           <Button
             onClick={() => {
-              setAccessToken("");
+              setLoginStateSignOut();
               navigate("/");
             }}
           >

@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "react-query";
-import { useIsSignIn } from "../../hooks/useIsSignIn";
+import { useLoginState } from "../../hooks/useLoginState";
 
 import {
   ProposalSummaryObj,
@@ -37,7 +37,7 @@ export const useUpload = () => {
   // [Todo] Alert 수정 필요
   const { openAlert, Alert } = useAlert();
   const successAlert = useAlert();
-  const { loginState } = useIsSignIn();
+  const { loginState } = useLoginState();
   const [proposalSummaryList, setProposalSummaryList] = React.useState<ProposalSummaryList>([]);
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
