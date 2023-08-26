@@ -2,7 +2,7 @@ import React from "react";
 import { Toolbar, Stack, Button, Typography } from "@mui/material";
 import { Title } from "../molecules/Title";
 import PortraitIcon from "@mui/icons-material/Portrait";
-import { useLoginState } from "../../hooks/useLoginState";
+import { useSign } from "../../hooks/useSign";
 import { useNavigate } from "react-router-dom";
 import { useAtomValue } from "jotai";
 import { accessTokenAtom } from "../../store/atoms";
@@ -19,7 +19,7 @@ import { ContentsSearchModal } from "./ContentSearchModal";
 
 export const MainHeader = () => {
   const { openAlert, Alert } = useAlert();
-  const { loginState, setLoginStateSignOut } = useLoginState();
+  const { loginState, setLoginStateSignOut } = useSign();
   const accessToken = useAtomValue(accessTokenAtom);
   const navigate = useNavigate();
   const [contents, setContents] = React.useState<ProposalSummaryList>([]);

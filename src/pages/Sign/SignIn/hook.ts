@@ -6,7 +6,7 @@ import { createControlledReg } from "../../../lib/utils/createControlledReg";
 import { useMutation } from "react-query";
 import { PropsSign, userApi } from "../../../apis/user";
 import { useAlert } from "../../../hooks/useAlert";
-import { useLoginState } from "../../../hooks/useLoginState";
+import { useSign } from "../../../hooks/useSign";
 
 const ID = "id";
 const PW = "password";
@@ -17,7 +17,7 @@ export const useSignIn = () => {
   const [isChecked, setIsChecked] = React.useState(false);
   const createReg = createControlledReg(control);
   const { openAlert, Alert } = useAlert();
-  const { setLoginStateSignIn } = useLoginState();
+  const { setLoginStateSignIn } = useSign();
   const mutation = useMutation({
     mutationFn: async ({ email, password }: PropsSign) => {
       return await userApi.signIn({ email, password });
