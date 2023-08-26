@@ -125,8 +125,8 @@ export const Upload = () => {
                   onChange={(e) => {
                     if (!e.target.files?.[0]) return;
                     const referenceFileIds = proposalInfoList
-                    .map((post, i) => (selectedProposalList[i] ? String(post.id) : null))
-                    .filter((id) => id !== null) as string[];
+                      .map((post, i) => (selectedProposalList[i] ? String(post.id) : null))
+                      .filter((id) => id !== null) as string[];
                     generateNewProposal({
                       pdf: e.target.files[0],
                       referenceFileIds,

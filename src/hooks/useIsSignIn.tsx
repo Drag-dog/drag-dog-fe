@@ -15,17 +15,22 @@ export const useIsSignIn = () => {
     if (accessToken === "") {
       setLoginState(LOGIN_STATE.UNKNOWN);
     } else {
-      userApi.getIsSignIn(accessToken).then(({ data }) => {
-        switch (data?.isLoggedIn) {
-          case true:
-            setLoginState(LOGIN_STATE.LOGGED_IN);
-            break;
-          case false:
-          default:
-            setLoginState(LOGIN_STATE.NOT_LOGGED_IN);
-            break;
-        }
-      });
+      userApi
+        .getIsSignIn(accessToken)
+        .then(({ data }) => {
+          switch (data?.isLoggedIn) {
+            case true:
+              setLoginState(LOGIN_STATE.LOGGED_IN);
+              break;
+            case false:
+            default:
+              setLoginState(LOGIN_STATE.NOT_LOGGED_IN);
+              break;
+          }
+        })
+        .catch(() => {
+          setLoginState(LOGIN_STATE.UNKNOWN);
+        });
     }
   }, [accessToken]);
   return { loginState };
