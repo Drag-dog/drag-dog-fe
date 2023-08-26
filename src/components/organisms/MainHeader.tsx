@@ -99,6 +99,7 @@ export const MainHeader = () => {
       <Stack direction="row" spacing={2} sx={{ marginLeft: 2, flexGrow: 1, justifyContent: "end" }}>
         <Button
           onClick={() => {
+            if (loginState !== LOGIN_STATE.LOGGED_IN) return navigate("/sign-in");
             contentsSearchModal.handleOpen();
             proposalApi.getSearchContents({ accessToken, query: "" }).then((res) => {
               setContents(ProposalSummaryProxy.toFE(res.data));
@@ -110,12 +111,20 @@ export const MainHeader = () => {
             기존 항목 검색
           </Typography>
         </Button>
-        <Button onClick={() => navigate("/upload")}>
+        <Button
+          onClick={() =>
+            loginState === LOGIN_STATE.LOGGED_IN ? navigate("/upload") : navigate("/sign-in")
+          }
+        >
           <Typography color="GrayText" fontSize="12px">
             업로드
           </Typography>
         </Button>
-        <Button onClick={() => navigate("/success")}>
+        <Button
+          onClick={() =>
+            loginState === LOGIN_STATE.LOGGED_IN ? navigate("/success") : navigate("/sign-in")
+          }
+        >
           <Typography color="GrayText" fontSize="12px">
             최근 사업계획서
           </Typography>
