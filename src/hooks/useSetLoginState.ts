@@ -38,5 +38,5 @@ export const useSetLoginState = () => {
   React.useLayoutEffect(() => {
     if (accessToken !== "") mutGetIsSignIn.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [accessToken]);
 };
