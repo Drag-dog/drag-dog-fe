@@ -5,10 +5,12 @@ import { useAtomValue } from "jotai";
 import { questionAtom, resProposalsAtom } from "../../store/atoms";
 import { Empty } from "../../components/atoms";
 import { appColor } from "../../constants/appColor";
+import { useSign } from "../../hooks/useSign";
 
 export const Success = () => {
   const resProposal = useAtomValue(resProposalsAtom);
   const question = useAtomValue(questionAtom);
+  useSign({ redirctToSignIn: true });
   return (
     <PageLayout>
       <PageLayout.Title />

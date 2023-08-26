@@ -24,10 +24,9 @@ export const useSign = (props?: PropsUseSign) => {
     setLoginState(LOGIN_STATE.NOT_LOGGED_IN);
   };
 
+  // [Todo] DOM 연결 후 navigate가 작동하므로 useEffect를 사용하는데, Render가 된 직후다 보니 깜빡이는 현상이 있음 -> loader와 redirect를 사용해야 할 듯
   React.useEffect(() => {
-    if (redirctToSignIn && loginState === LOGIN_STATE.NOT_LOGGED_IN) {
-      navigate("/sign-in");
-    }
+    if (redirctToSignIn && loginState !== LOGIN_STATE.LOGGED_IN) navigate("/sign-in");
   }, [loginState, navigate, redirctToSignIn]);
 
   return { loginState, setLoginStateSignIn, setLoginStateSignOut };
