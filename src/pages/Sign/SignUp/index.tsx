@@ -18,7 +18,7 @@ export const SignUp = () => {
         <PageLayout.Title />
         <PageLayout.Absolute>
           {isLoading && <Loading />}
-          <Alert>회원가입에 실패하였습니다</Alert>
+          <Alert />
         </PageLayout.Absolute>
         <PageLayout.SubTitle>
           <Typography>회원 정보를 입력해주세요.</Typography>
