@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "react-query";
-import { useIsSignIn } from "../../hooks/useIsSignIn";
+import { useSign } from "../../hooks/useSign";
 
 import {
   ProposalSummaryObj,
@@ -37,7 +37,7 @@ export const useUpload = () => {
   // [Todo] Alert 수정 필요
   const { openAlert, Alert } = useAlert();
   const successAlert = useAlert();
-  const { loginState } = useIsSignIn();
+  const { loginState } = useSign({ redirctToSignIn: true });
   const [proposalSummaryList, setProposalSummaryList] = React.useState<ProposalSummaryList>([]);
   const [openedSummaryId, setOpenedSummaryId] = React.useState<string>("");
   const setResProposal = useSetAtom(resProposalsAtom);
@@ -156,7 +156,9 @@ export const useUpload = () => {
       );
       setResProposal(result);
     },
-    onSuccess: () => navigate("/success"),
+    onSuccess: () => {
+      navigate("/success");
+    },
   });
 
   const mutGenerateProposalByOneContents = useMutation({
@@ -369,12 +371,8 @@ export const useUpload = () => {
     );
   };
 
-  React.useLayoutEffect(() => {
-    if (loginState === LOGIN_STATE.NOT_LOGGED_IN) {
-      navigate("/sign-in");
-    } else if (loginState === LOGIN_STATE.LOGGED_IN) {
-      mutGetProposalInfoList.mutate();
-    }
+  React.useEffect(() => {
+    if (loginState === LOGIN_STATE.LOGGED_IN) mutGetProposalInfoList.mutate();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loginState]);
 

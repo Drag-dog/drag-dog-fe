@@ -5,6 +5,7 @@ import { isEmpty } from "../../lib/utils/isEmpty";
 import { Empty } from "../atoms";
 import { sizes } from "../../constants/sizes";
 import { MainHeader } from "../organisms/MainHeader";
+import { useSetLoginState } from "../../hooks/useSetLoginState";
 
 const Layout = styled("div")({
   display: "flex",
@@ -16,13 +17,17 @@ const Layout = styled("div")({
 
 type Props = { children?: React.ReactNode };
 
-// [Todo] useSignIn을 여기서 호출하면 좋을 것 같음
 const Main = ({ children }: Props) => {
   const [TitleComponenets] = getChildrenByName(children, "Title");
   const [SubTitleComponenets] = getChildrenByName(children, "SubTitle");
   const arrayBodyComponenets = getChildrenByName(children, "Body");
   const arrayAbsoluteComponenets = getChildrenByName(children, "Absolute");
   const arrayMainCtaComponenets = getChildrenByName(children, "MainCta");
+
+  /**
+   * @description 로그인 상태를 설정
+   */
+  useSetLoginState();
 
   return (
     <Layout>
