@@ -14,7 +14,7 @@ export const SignIn = () => {
       <PageLayout>
         <PageLayout.Title />
         <PageLayout.Absolute>
-          <Alert>로그인에 실패했습니다</Alert>
+          <Alert />
         </PageLayout.Absolute>
         <PageLayout.SubTitle>
           <Typography variant="h1">Sign In</Typography>

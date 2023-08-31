@@ -54,7 +54,7 @@ export const useUpload = () => {
       setProposalInfoList(res.data);
       setSelectedProposalList(Array(res.data.length).fill(true));
     },
-    onError: () => openAlert(),
+    onError: (e: any) => openAlert({ contents: e.message, severity: "error" }),
   });
 
   const mutSummaizePdf = useMutation({
@@ -68,7 +68,7 @@ export const useUpload = () => {
       mutGetProposalInfoList.mutate();
       summaryModal.handleOpen();
     },
-    onError: () => openAlert(),
+    onError: (e: any) => openAlert({ contents: e.message, severity: "error" }),
   });
 
   const mutDeleteProposalSummary = useMutation({
@@ -76,7 +76,7 @@ export const useUpload = () => {
       await proposalApi.deleteProposalSummary({ accessToken, proposalKey });
     },
     onSuccess: () => mutGetProposalInfoList.mutate(),
-    onError: () => openAlert(),
+    onError: (e: any) => openAlert({ contents: e.message, severity: "error" }),
   });
 
   /**
@@ -114,11 +114,12 @@ export const useUpload = () => {
         proposalKey: Number(openedSummaryId),
       });
       setProposalSummaryList(ProposalSummaryProxy.toFE(res.data));
-      successAlert.openAlert();
+      successAlert.openAlert({
+        contents: "요약된 사업계획서가 수정되었습니다.",
+        severity: "success",
+      });
     },
-    onError: () => {
-      openAlert();
-    },
+    onError: (e: any) => openAlert({ contents: e.message, severity: "error" }),
   });
 
   const [_proposalSummary, _setProposalSummaryList] =
@@ -129,11 +130,13 @@ export const useUpload = () => {
   }>({ referenceFileIds: [""] });
   const mutPostGenerateProposalSummary = useMutation({
     mutationFn: async ({ pdf, referenceFileIds }: { pdf: File; referenceFileIds: string[] }) => {
+      if (referenceFileIds.length === 0) throw new Error("학습시킬 사업계획서를 선택해주세요.");
       const proposalSummary = await proposalApi.postGenerateProposalSummary({ accessToken, pdf });
       _setProposalSummaryList(proposalSummary);
       propsGenerateProposalSummary.current = { referenceFileIds };
     },
     onSuccess: () => selectBoxModal.handleOpen(),
+    onError: (e: any) => openAlert({ contents: e.message, severity: "error" }),
   });
 
   const mutPostAnswerProposal = useMutation({
@@ -184,11 +187,6 @@ export const useUpload = () => {
     mutDeleteProposalSummary.mutate(proposalId);
   };
 
-  const SuccessAlert = () => (
-    <successAlert.Alert severity="success">
-      <Typography>요약된 사업계획서가 수정되었습니다.</Typography>
-    </successAlert.Alert>
-  );
   const SelectBoxModal = () => {
     const [answerType, setAnswerType] = React.useState<string>("descriptive");
     const [selected, setSelected] = React.useState<boolean[]>(
@@ -391,7 +389,6 @@ export const useUpload = () => {
     onDelete,
     isSummaryLoading: mutSummaizePdf.isLoading,
     Alert,
-    SuccessAlert,
     SelectBoxModal,
     ProposalSummaryModal() {
       return (

@@ -26,9 +26,7 @@ export const useSignIn = () => {
       setLoginStateSignIn(res.data.accessToken);
       navigate("/upload");
     },
-    onError: () => {
-      openAlert();
-    },
+    onError: (e: any) => openAlert({ contents: e.message, severity: "error" }),
   });
 
   const reg = {

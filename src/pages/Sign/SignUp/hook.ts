@@ -27,9 +27,7 @@ export const useSignUp = () => {
     onSuccess: () => {
       navigate("/sign-in");
     },
-    onError: () => {
-      openAlert();
-    },
+    onError: (e: any) => openAlert({ contents: e.message, severity: "error" }),
   });
 
   React.useEffect(() => {}, []);

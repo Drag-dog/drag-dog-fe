@@ -32,7 +32,7 @@ export const MainHeader = () => {
       setContents(ProposalSummaryProxy.toFE(res.data));
       contentsSearchModal.handleOpen();
     },
-    onError: () => openAlert(),
+    onError: (e: any) => openAlert({ contents: e.message, severity: "error" }),
   });
 
   const contentsSearchModal = useModal();
@@ -92,7 +92,7 @@ export const MainHeader = () => {
           searchContents={mutSearchContents.mutate}
           contents={contents}
         />
-        <Alert>검색에 실패하였습니다</Alert>
+        <Alert />
       </div>
       <Title />
 

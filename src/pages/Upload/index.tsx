@@ -21,10 +21,8 @@ export const Upload = () => {
     ProposalSummaryModal,
     generateNewProposal,
     generateProposalSummaryLoading,
-    SuccessAlert,
     SelectBoxModal,
     UploadModal,
-    openUploadModal,
   } = useUpload();
   const { Loading } = useLoading();
 
@@ -37,10 +35,9 @@ export const Upload = () => {
       </PageLayout.SubTitle>
       <PageLayout.Absolute>
         {isSummaryLoading && <Loading />}
-        <Alert>오류가 발생했습니다.</Alert>
+        <Alert />
         <UploadModal />
         <ProposalSummaryModal />
-        <SuccessAlert />
         <SelectBoxModal />
       </PageLayout.Absolute>
       <PageLayout.Body>

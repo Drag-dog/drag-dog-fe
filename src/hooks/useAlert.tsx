@@ -4,26 +4,28 @@ import { AppAlert } from "../components/molecules/AppALert";
 import { AlertColor } from "@mui/material/Alert";
 
 export const useAlert = () => {
-  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
+  const [isAlertOpen, setIsAlertOpen] = React.useState<boolean>(false);
+  const [alertConfig, setAlertConfig] = React.useState<PropsOpenAlert>({ contents: <></> });
   const ref = React.useRef<HTMLElement>();
 
-  const openAlert = () => setIsAlertOpen(true);
+  const openAlert = ({ contents, severity = "error" }: PropsOpenAlert) => {
+    setAlertConfig({ contents, severity });
+    setIsAlertOpen(true);
+  };
+
   const closeAlert = () => setIsAlertOpen(false);
 
-  const Alert = React.useCallback(
-    ({ children, severity = "error" }: { children: React.ReactNode; severity?: AlertColor }) => {
-      if (ref.current && isAlertOpen) {
-        return createPortal(
-          <AppAlert isOpen={isAlertOpen} closeAlert={closeAlert} severity={severity}>
-            {children}
-          </AppAlert>,
-          ref.current
-        );
-      }
-      return <></>;
-    },
-    [isAlertOpen]
-  );
+  const Alert = React.useCallback(() => {
+    if (ref.current && isAlertOpen) {
+      return createPortal(
+        <AppAlert isOpen={isAlertOpen} closeAlert={closeAlert} severity={alertConfig.severity}>
+          {alertConfig.contents}
+        </AppAlert>,
+        ref.current
+      );
+    }
+    return <></>;
+  }, [isAlertOpen, alertConfig]);
 
   React.useEffect(() => {
     const $modal = document.getElementById("root-alert")!;
@@ -31,4 +33,9 @@ export const useAlert = () => {
   }, []);
 
   return { openAlert, Alert };
+};
+
+type PropsOpenAlert = {
+  contents: React.ReactNode;
+  severity?: AlertColor;
 };
